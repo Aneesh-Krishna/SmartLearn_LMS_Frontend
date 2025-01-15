@@ -1,0 +1,95 @@
+.meeting-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.course-title {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.new-meeting-btn {
+    font-size: 1rem;
+    padding: 10px 15px;
+}
+
+.meeting-list {
+    list-style: none;
+    padding: 0;
+}
+
+.meeting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.meeting-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.meeting-name {
+    font-weight: bold;
+    color: #555;
+}
+
+.meeting-status {
+    color: red;
+    font-size: 0.9rem;
+}
+
+.meeting-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.meeting-id {
+    font-size: 0.9rem;
+    padding: 5px;
+    border: none;
+    background: transparent;
+    cursor: default;
+}
+
+.join-meeting-btn {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.no-meetings {
+    text-align: center;
+    font-size: 1rem;
+    color: #666;
+}
+
+.return-link {
+    display: block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #007bff;
+    font-size: 1rem;
+}

@@ -1,0 +1,56 @@
+.options-container {
+    padding: 20px;
+}
+
+.back-link {
+    text-decoration: none;
+    color: #007bff;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.question-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.new-option-btn {
+    margin-bottom: 20px;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.options-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.option-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.option-text {
+    flex: 1;
+}
+
+.option-correct {
+    margin-left: 20px;
+    font-weight: bold;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}

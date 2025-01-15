@@ -1,0 +1,168 @@
+/* General Container Styling */
+.assignments-container {
+    padding: 20px;
+    background-color: #f9fafc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styling */
+.assignments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.assignments-header h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Search Bar Styling */
+.search-bar {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.search-bar input {
+    width: 60%;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Assignment Card Styling */
+.card {
+    border: none;
+    border-radius: 8px;
+    transition: transform 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-body {
+    padding: 15px;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.card-subtitle button {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.card-subtitle button:hover {
+    text-decoration: underline;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* Button Styling */
+.btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+}
+
+.btn-outline-success {
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.btn-outline-success:hover {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 8px;
+}
+
+.modal-header {
+    border-bottom: none;
+    background-color: #f1f1f1;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.modal-header .modal-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.modal-footer {
+    border-top: none;
+}
+
+.modal-body {
+    font-size: 1rem;
+    color: #555;
+}
+
+.modal-footer .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.modal-footer .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+.modal-footer .btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.modal-footer .btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+/* Loading Spinner */
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
