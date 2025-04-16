@@ -4,7 +4,7 @@ import '../styles/Login.css';
 
 
 function Login({ setAuthToken, setShowRegister }) {
-  document.title = 'Login: Assignment-App';
+  document.title = 'Login: SmartLearn_LMS';
 
   const [formData, setFormData] = useState({
     userName: '',
@@ -62,60 +62,60 @@ function Login({ setAuthToken, setShowRegister }) {
 
   return (
     <body className='login-page'>
-    <div className="login-container">
-      <div className="login-box">
-        <div className="login-header">
-          <div className="icon-container">
-            <span className="login-icon">🔒</span>
-          </div>
-          <h2>Welcome back</h2>
-          <p>Please enter your details to sign in</p>
-        </div>
-
-        {error && <div className="error-message">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="userName">Username</label>
-            <input
-              id="userName"
-              name="userName"
-              type="text"
-              required
-              value={formData.userName}
-              onChange={handleChange}
-              placeholder="Enter your username"
-            />
+      <div className="login-container">
+        <div className="login-box">
+          <div className="login-header">
+            <div className="icon-container">
+              <span className="login-icon">🔒</span>
+            </div>
+            <h2>Welcome back</h2>
+            <p>Please enter your details to sign in</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-            />
-          </div>
+          {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" disabled={isLoading} className="submit-button">
-            {isLoading ? 'Loading...' : 'Sign in'}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label htmlFor="userName">Username</label>
+              <input
+                id="userName"
+                name="userName"
+                type="text"
+                required
+                value={formData.userName}
+                onChange={handleChange}
+                placeholder="Enter your username"
+              />
+            </div>
 
-        <div className="login-footer">
-          <p>
-            Not a member?{' '}
-            <button onClick={() => setShowRegister(true)} className="register-link">
-              Register now
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+              />
+            </div>
+
+            <button type="submit" disabled={isLoading} className="submit-button">
+              {isLoading ? 'Loading...' : 'Sign in'}
             </button>
-          </p>
+          </form>
+
+          <div className="login-footer">
+            <p>
+              Not a member?{' '}
+              <button onClick={() => setShowRegister(true)} className="register-link">
+                Register now
+              </button>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
     </body>
   );
 }

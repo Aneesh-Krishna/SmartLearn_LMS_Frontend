@@ -6,7 +6,7 @@ import { deleteAssignment, downloadAssignmentFile, fetchAllAssignments, uploadAs
 import "../styles/Assignments.css";
 
 function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId, setAssignmentText }) {
-    document.title = 'Assignments: ClassroomApp'  
+    document.title = 'Assignments: SmartLearn_LMS'
 
     const [formData, setFormData] = useState({
         text: "",
