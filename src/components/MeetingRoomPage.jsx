@@ -2,16 +2,127 @@ import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt';
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { APP_Id, SecreteKey } from '../services/MeetingRoomPageConfig';
+import axios from 'axios';
+import jsPDF from 'jspdf';
 
 function MeetingRoomPage() {
   const { meetingId } = useParams();
   const navigate = useNavigate();
-  const [joined, setJoined] = useState(false);
   const zpRef = useRef(null);
-  const containerRef = useRef(null); // Ref for the container element
-  const [isRecording, setIsRecording] = useState(false)
-  var fullText = "";  // To store the full converted text
+  const containerRef = useRef(null);
+  const videoRefs = useRef({});
+  const canvasRefs = useRef({});
+  const audioRefs = useRef({});
+  const [participants, setParticipants] = useState([]);
+  const [captionText, setCaptionText] = useState("");
+  const [transcribing, setTranscribing] = useState(false);
+  let fullText = "";
+  const [emotionReports, setEmotionReports] = useState([]);
 
+  // Function to capture video frames for emotion analysis
+  // const captureVideoFrames = (userID, displayName) => {
+  //   const video = videoRefs.current[userID];
+  //   const canvas = canvasRefs.current[userID];
+  //   if (video && canvas) {
+  //     const ctx = canvas.getContext("2d");
+  //     canvas.width = video.videoWidth;
+  //     canvas.height = video.videoHeight;
+  //     setInterval(() => {
+  //       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  //       const imageData = canvas.toDataURL("image/png");
+  //       console.log(`Captured frame for ${displayName} (${userID}):`, imageData);
+
+  //       setEmotionReports(prevReports => [
+  //         ...prevReports.filter(r => r.userID !== userID),
+  //         { userID, displayName, imageData, timestamp: new Date().toISOString() }
+  //       ]);
+  //     }, 1000);
+  //   }
+  // };
+
+  const captureVideoFrames = (userID, displayName) => {
+    const video = videoRefs.current[userID];
+    const canvas = canvasRefs.current[userID];
+    if (video && canvas) {
+      const ctx = canvas.getContext("2d");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      setInterval(async () => {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = canvas.toDataURL("image/png"); // Convert to Base64
+
+        try {
+          const response = await axios.post("http://localhost:8000/analyze_video", {
+            userID,
+            displayName,
+            imageData,
+          });
+
+          console.log(`Emotion Analysis for ${displayName}:`, response.data);
+          setEmotionReports(prevReports => [
+            ...prevReports.filter(r => r.userID !== userID),
+            { userID, displayName, emotion: response.data.emotion, timestamp: new Date().toISOString() }
+          ]);
+        } catch (error) {
+          console.error("Error analyzing video:", error);
+        }
+      }, 3000); // Process every 3 seconds
+    }
+  };
+
+  // Function to capture audio for sentiment analysis
+  // const captureAudio = async (stream, userID, displayName) => {
+  //   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  //   const source = audioContext.createMediaStreamSource(stream);
+  //   const analyser = audioContext.createAnalyser();
+  //   source.connect(analyser);
+  //   const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  //   setInterval(() => {
+  //     analyser.getByteFrequencyData(dataArray);
+  //     console.log(`Audio frequency data for ${displayName} (${userID}):`, dataArray);
+  //   }, 1000);
+  // };
+
+  const captureAudio = async (stream, userID, displayName) => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const mediaRecorder = new MediaRecorder(stream);
+    let audioChunks = [];
+
+    mediaRecorder.ondataavailable = event => {
+      audioChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+      const formData = new FormData();
+      formData.append("file", audioBlob);
+      formData.append("userID", userID);
+      formData.append("displayName", displayName);
+
+      try {
+        const response = await axios.post("http://localhost:8000/analyze_audio", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        console.log(`Audio Sentiment for ${displayName}:`, response.data);
+      } catch (error) {
+        console.error("Error analyzing audio:", error);
+      }
+
+      audioChunks = [];
+    };
+
+    setInterval(() => {
+      mediaRecorder.stop();
+      mediaRecorder.start();
+    }, 5000); // Capture every 5 seconds
+
+    mediaRecorder.start();
+  };
+
+
+  // Function for real-time speech-to-text transcription
   const handleSpeechToText = () => {
     var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
     var recognition = new SpeechRecognition();
@@ -20,96 +131,113 @@ function MeetingRoomPage() {
     recognition.lang = 'en-IN';
     recognition.interimResults = true;
     recognition.maxAlternatives = 1;
-    
-    // var diagnostic = document.getElementById('text');
 
-    if (!isRecording) {
+    setTranscribing(!transcribing);
+    if (!transcribing) {
       recognition.start();
-      setIsRecording(true);
-    } 
-    else {
+    } else {
       recognition.stop();
-      setIsRecording(false);
-      saveTextToPDF();  // Save text to PDF when stopping
+      setCaptionText("");
     }
-    
+
     recognition.onresult = function (event) {
       var last = event.results.length - 1;
       var convertedText = event.results[last][0].transcript;
-      fullText += convertedText + ' ';  // Append to the full text
-      // diagnostic.value = convertedText;
-      console.log(fullText)
-      console.log('Confidence: ' + event.results[0][0].confidence);
-    };
-
-    recognition.onnomatch = function () {
-        // diagnostic.value = 'I didn\'t recognise that.';
-        console.log("I didn't recognize that")
+      setCaptionText(convertedText);
+      fullText += convertedText + ' ';
+      console.log(fullText);
     };
 
     recognition.onerror = function (event) {
-        // diagnostic.value = 'Error occurred in recognition: ' + event.error;
-        console.log("Error occured in recognition")
+      console.log("Error occurred in recognition", event.error);
     };
-  }
+  };
 
-  const saveTextToPDF = () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(12);
+    doc.text("Meeting Sentiment Analysis Report", 10, 10);
 
-      // Split text into lines to fit into the PDF page size
-      const lines = doc.splitTextToSize(fullText, 180);  // Width of 180 to fit into A4 page width
-      doc.text(lines, 10, 10);
+    let yOffset = 20;
 
-      // Save the PDF
-      doc.save('SpeechToText.pdf');
-  }
+    // Append Emotion Analysis
+    doc.text("Video Sentiment Analysis:", 10, yOffset);
+    yOffset += 10;
+
+    emotionReports.forEach((report, index) => {
+      doc.text(
+        `${index + 1}. ${report.displayName} (${report.timestamp}): ${report.emotion}`,
+        10,
+        yOffset
+      );
+      yOffset += 10;
+    });
+
+    // Append Speech Transcription
+    doc.text("Speech Transcription:", 10, yOffset);
+    yOffset += 10;
+    doc.text(fullText || "No speech recorded.", 10, yOffset, { maxWidth: 180 });
+
+    // Save the PDF
+    doc.save(`Meeting_Report_${new Date().toISOString()}.pdf`);
+  };
 
   useEffect(() => {
     const appId = APP_Id;
     const serverSecrete = SecreteKey;
 
-    // Generate kit token
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
       appId,
       serverSecrete,
       meetingId,
-      `user_${Math.random().toString(36).substr(2, 9)}`, // Unique user ID
+      `user_${Math.random().toString(36).substr(2, 9)}`,
       "Your_Name"
     );
 
-    // Initialize ZegoUIKitPrebuilt
     const zp = ZegoUIKitPrebuilt.create(kitToken);
     zpRef.current = zp;
 
-    // Join room
     zp.joinRoom({
-      container: containerRef.current, // Use the ref for the container
-      sharedLinks: [
-        {
-          name: 'Personal link',
-          url:
-            window.location.protocol +
-            '//' +
-            window.location.host +
-            window.location.pathname +
-            '?roomID=' +
-            meetingId,
-        },
-      ],
-      scenario: {
-        mode: ZegoUIKitPrebuilt.VideoConference,
-      },
+      container: containerRef.current,
+      scenario: { mode: ZegoUIKitPrebuilt.VideoConference },
       maxUsers: 10,
       onJoinRoom: () => {
-        setJoined(true);
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+          const localUserID = "local_user";
+          videoRefs.current[localUserID] = document.createElement("video");
+          canvasRefs.current[localUserID] = document.createElement("canvas");
+          videoRefs.current[localUserID].srcObject = stream;
+          videoRefs.current[localUserID].play();
+          captureVideoFrames(localUserID, "You");
+          captureAudio(stream, localUserID, "You");
+        });
+      },
+      onRemoteUserUpdate: (updateType, users) => {
+        if (updateType === "ADD") {
+          setParticipants(prev => [...prev, ...users]);
+          users.forEach(user => {
+            zpRef.current.getRemoteVideoStream(user.userID).then(stream => {
+              videoRefs.current[user.userID] = document.createElement("video");
+              canvasRefs.current[user.userID] = document.createElement("canvas");
+              videoRefs.current[user.userID].srcObject = stream;
+              videoRefs.current[user.userID].play();
+              captureVideoFrames(user.userID, user.userName);
+              captureAudio(stream, user.userID, user.userName);
+            });
+          });
+        } else if (updateType === "DELETE") {
+          setParticipants(prev => prev.filter(p => !users.some(u => u.userID === p.userID)));
+        }
       },
       onLeaveRoom: () => {
+        generatePDF();
+        if (zpRef.current) {
+          zpRef.current.destroy();
+        }
         navigate("/meetings");
       },
     });
 
-    // Cleanup when the component unmounts
     return () => {
       if (zpRef.current) {
         zpRef.current.destroy();
@@ -117,57 +245,31 @@ function MeetingRoomPage() {
     };
   }, [meetingId, navigate]);
 
-  const handleExit = () => {
-    if (zpRef.current) {
-      zpRef.current.destroy(); // Cleanup Zego instance
-      zpRef.current = null
-    }
-
-    navigate("/meetings"); // Navigate back to meetings
-  };
-
   return (
     <div className="room-container">
-      <button
-      onClick={handleSpeechToText}
-      style={{
-        position: "absolute",
-        top: "10px",
-        right: "20px",
-        zIndex: 1000,
-        padding: "10px 20px",
-        backgroundColor: "#ff4d4f",
-        color: "#fff",
-        border: "none",
-        borderRadius: "5px",
-        cursor: "pointer",
-      }}
-    >
-      Record
-    </button>
-       <button
-        onClick={handleExit}
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          zIndex: 1000,
-          padding: "10px 20px",
-          backgroundColor: "#ff4d4f",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        Exit
-      </button>
-      <div
-        ref={containerRef} // Assign the ref to the container
-        className="myCallContainer"
-        style={{ width: '100vw', height: '100vh' }}
-      ></div>
-      {/* <textarea id="text" placeholder="Your converted text will appear here..." readonly></textarea> */}
+      <button onClick={handleSpeechToText} className="record-btn">{transcribing ? "Stop" : "Record"}</button>
+      <button onClick={() => navigate("/meetings")} className="exit-btn">Exit</button>
+      <div ref={containerRef} className="myCallContainer" style={{ width: '100vw', height: '100vh' }}></div>
+      {transcribing && (
+        <div className="caption-text"
+          style={{
+            position: "absolute",
+            bottom: "30px", // Display captions at bottom
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            color: "#fff",
+            padding: "10px",
+            borderRadius: "5px",
+            fontSize: "18px",
+            maxWidth: "80%",
+            textAlign: "center",
+            zIndex: 1000,
+          }}
+        >
+          {captionText || "Transcribed text will appear here..."}
+        </div>
+      )}
     </div>
   );
 }
