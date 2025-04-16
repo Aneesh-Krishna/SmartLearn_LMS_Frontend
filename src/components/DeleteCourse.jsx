@@ -1,10 +1,10 @@
 import React from "react";
 
-function DeleteCourse({authToken, courseId, courseName}){
+function DeleteCourse({ authToken, courseId, courseName }) {
 
-    document.title = 'Delete-Course: Assignment-App'
+    document.title = 'Delete-Course: SmartLearn_LMS'
 
-    return(
+    return (
         <>
             <p>Delete</p>
         </>

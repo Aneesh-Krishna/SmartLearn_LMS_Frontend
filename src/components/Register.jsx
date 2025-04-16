@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Register.css';
 
 function Register({ setShowRegister }) {
-    document.title = 'Register: Assignment-App';
+    document.title = 'Register: SmartLearn_LMS';
 
     const [formData, setFormData] = useState({
         userName: '',
@@ -53,18 +53,18 @@ function Register({ setShowRegister }) {
 
     return (
         <body className='register-page'>
-        <div className="register-container">
-            <form className="register-form" onSubmit={handleSubmit}>
-                <div className="register-header">
-                    <h2>Register</h2>
-                    <p>Signup now and get full access to our app.</p>
-                </div>
+            <div className="register-container">
+                <form className="register-form" onSubmit={handleSubmit}>
+                    <div className="register-header">
+                        <h2>Register</h2>
+                        <p>Signup now and get full access to our app.</p>
+                    </div>
 
-                <div className="form-group">
-                    <label htmlFor='fullName'>  Full Name</label>
-                      
+                    <div className="form-group">
+                        <label htmlFor='fullName'>  Full Name</label>
+
                         <input
-                        id='fullName'
+                            id='fullName'
                             className="form-control"
                             name="fullName"
                             type="text"
@@ -73,14 +73,14 @@ function Register({ setShowRegister }) {
                             placeholder="Enter your full name"
                             required
                         />
-                    
-                </div>
 
-                <div className="form-group">
-                    <label htmlFor='userName'> 
-                        Username  </label>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor='userName'>
+                            Username  </label>
                         <input
-                        id='userName'
+                            id='userName'
                             className="form-control"
                             name="userName"
                             type="text"
@@ -89,30 +89,30 @@ function Register({ setShowRegister }) {
                             placeholder="Enter your username"
                             required
                         />
-                  
-                </div>
 
-                <div className="form-group">
-                    <label htmlFor='Email'>
-                        Email</label>
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor='Email'>
+                            Email</label>
                         <input
-                        id='email'
+                            id='email'
                             className="form-control"
                             name="email"
                             type="email"
                             onChange={handleChange}
                             value={formData.email}
-                             placeholder="Enter your email"
+                            placeholder="Enter your email"
                             required
                         />
-                    
-                </div>
 
-                <div className="form-group">
-                    <label>
-                        Password </label>
+                    </div>
+
+                    <div className="form-group">
+                        <label>
+                            Password </label>
                         <input
-                         id="password"
+                            id="password"
                             className="form-control"
                             name="password"
                             type="password"
@@ -121,25 +121,25 @@ function Register({ setShowRegister }) {
                             placeholder="••••••••"
                             required
                         />
-                   
-                </div>
 
-                <button className="submit-button" type="submit">
-                    Submit
-                </button>
+                    </div>
 
-                <p className="register-footer">
-                    Already have an account?{' '}
-                    <button
-                        type="button"
-                        className="signin-button"
-                        onClick={() => setShowRegister(false)}
-                    >
-                        Sign in
+                    <button className="submit-button" type="submit">
+                        Submit
                     </button>
-                </p>
-            </form>
-        </div>
+
+                    <p className="register-footer">
+                        Already have an account?{' '}
+                        <button
+                            type="button"
+                            className="signin-button"
+                            onClick={() => setShowRegister(false)}
+                        >
+                            Sign in
+                        </button>
+                    </p>
+                </form>
+            </div>
         </body>
     );
 }

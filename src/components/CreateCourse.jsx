@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import '../styles/CreateCourse.css'; // Import the CSS file
 
 function CreateCourse({ authToken, setLoading }) {
-    document.title = 'Create-course: Assignment-App';
+    document.title = 'Create-course: SmartLearn_LMS';
 
     const [formData, setFormData] = useState({
         courseName: '',
@@ -32,7 +32,7 @@ function CreateCourse({ authToken, setLoading }) {
             form.append('description', formData.description);
             const response = await fetch('http://localhost:5116/api/course/Create', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${authToken}`,
                 },
                 body: form,
@@ -65,21 +65,21 @@ function CreateCourse({ authToken, setLoading }) {
                     {success && <div className="alert alert-success">Course created successfully!</div>}
 
                     <form onSubmit={handleSubmit} className="create-course-form">
-                        <input 
-                            type="text" 
-                            name="courseName" 
-                            placeholder="Course Name" 
-                            value={formData.courseName} 
-                            onChange={handleChange} 
+                        <input
+                            type="text"
+                            name="courseName"
+                            placeholder="Course Name"
+                            value={formData.courseName}
+                            onChange={handleChange}
                             className="input-field"
                             required
                         />
-                        <input 
-                            type="text" 
-                            name="description" 
-                            placeholder="Description" 
-                            value={formData.description} 
-                            onChange={handleChange} 
+                        <input
+                            type="text"
+                            name="description"
+                            placeholder="Description"
+                            value={formData.description}
+                            onChange={handleChange}
                             className="input-field"
                             required
                         />

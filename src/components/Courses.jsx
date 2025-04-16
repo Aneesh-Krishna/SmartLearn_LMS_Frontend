@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Courses.css';
 
 function Courses({ authToken, setCourseId, setCourseName, setAdmin, setAdminId, setDescription, setAuthToken, sortBy }) {
-    document.title = 'Courses: Assignment-App';
+    document.title = 'Courses: SmartLearn_LMS';
     const [courses, setCourses] = useState([]);
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);

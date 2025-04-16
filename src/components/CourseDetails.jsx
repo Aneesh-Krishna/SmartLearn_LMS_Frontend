@@ -5,7 +5,7 @@ import Spinner from './Loading';
 import { jwtDecode } from "jwt-decode";
 
 function CourseDetails({ authToken, courseId, courseName, admin, adminId, description }) {
-    document.title = 'Course-details: Assignment-App';
+    document.title = 'Course-details: SmartLearn_LMS';
 
     const navigate = useNavigate();
 

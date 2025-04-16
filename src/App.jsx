@@ -33,6 +33,8 @@ function App() {
     setSortBy(criteria);
   };
 
+  document.title = "SmartLearn_LMS"
+
   if (!authToken) {
     return (
       <div>
@@ -47,7 +49,7 @@ function App() {
 
   return (
     <>
-      <Navigation setAuthToken={setAuthToken} onSort={handleSort}/>
+      <Navigation setAuthToken={setAuthToken} onSort={handleSort} />
       <main className="app-main">
         <Routes>
           {/* Default route to courses */}
@@ -55,7 +57,7 @@ function App() {
             path="/"
             element={<Navigate to="/home" replace />}
 
-           
+
           />
 
           {/* Routes for the app */}
@@ -74,7 +76,7 @@ function App() {
               />
             }
           />
-           <Route
+          <Route
             path="/courses"
             element={
               <Courses
@@ -182,15 +184,15 @@ function App() {
               />
             }
           />
-                    <Route
+          <Route
             path="/library"
             element={
-              <LibraryMaterials 
+              <LibraryMaterials
                 authToken={authToken}
               />
             }
           />
-          
+
         </Routes>
       </main>
     </>
