@@ -1,10 +1,10 @@
 
-const BASE_URL = "https://localhost:7110/api/assignment";
+const BASE_URL = "http://localhost:5116/api/assignment";
 
 export const fetchAllAssignments = async (courseId, authToken) => {
 
     try{
-        const response = await fetch(`https://localhost:7110/api/assignment/${courseId}/assignments`, {
+        const response = await fetch(`http://localhost:5116/api/assignment/${courseId}/assignments`, {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${authToken}`,
@@ -51,7 +51,7 @@ export const uploadAssignment = async (courseId, text, file, authToken) => {
 
 export const downloadAssignmentFile = async (fileName, authToken) => {
     try {
-        const response = await fetch(`https://localhost:7110/api/file/${fileName}`, {
+        const response = await fetch(`http://localhost:5116/api/file/${fileName}`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${authToken}`,

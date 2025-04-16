@@ -4,15 +4,13 @@ import { NavLink } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) {
-    document.title = 'Submissions: Classroom-App';
+    document.title = 'Submissions: ClassroomApp';
 
     const [submissions, setSubmissions] = useState([]);
-    const [filteredSubmissions, setFilteredSubmissions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [file, setFile] = useState(null);
     const [submissionText, setSubmissionText] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
 
     const disabledRemoveButton = async (authToken) => {
         const decodedToken = jwtDecode(authToken);
@@ -24,7 +22,7 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
     const fetchAllSubmissions = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`https://localhost:7110/api/assignmentsubmission/${assignmentId}/GetAllAssignment-Submissions`, {
+            const response = await fetch(`http://localhost:5116/api/assignmentsubmission/${assignmentId}/GetAllAssignment-Submissions`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -34,7 +32,6 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
             if (response.ok) {
                 const data = await response.json();
                 setSubmissions(data?.$values || []);
-                setFilteredSubmissions(data?.$values || []);
             } else {
                 console.error("An error occurred while fetching the submissions: ", response.statusText);
             }
@@ -47,10 +44,6 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
 
     const handleUploadSubmission = async () => {
         try {
-            if(!file){
-                alert("File is required!")
-                return
-            }
             setLoading(true);
             const formData = new FormData();
             formData.append('text', submissionText);
@@ -67,7 +60,6 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
             if (response.ok) {
                 const newSubmission = await response.json();
                 setSubmissions((prev) => [...prev, newSubmission]);
-                setFilteredSubmissions((prev) => [...prev, newSubmission]);
                 setSubmissionText('');
             } else {
                 console.error("An error occurred while submitting the assignment: ", response.statusText);
@@ -80,42 +72,42 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
     };
 
     const handleDownload = async (submissionFileName) => {
-        try {
-            const response = await fetch(`https://localhost:7110/api/file/${submissionFileName}`, {
-                method: "GET",
-                headers: {
+            try {
+                const response = await fetch(`https://localhost:7110/api/file/${submissionFileName}`, {
+                  method: "GET",
+                  headers: {
                     Authorization: `Bearer ${authToken}`,
-                },
-            });
-
-            if (response.ok) {
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = submissionFileName; // Suggest the filename for the downloaded file
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            } else {
-                console.error("An error occurred while downloading...", response.statusText);
-            }
-        } catch (error) {
-            console.error("Something went wrong...:", error);
-        }
-    };
-
-    const handleSearch = (event) => {
-        const query = event.target.value.toLowerCase();
-        setSearchQuery(query);
-
-        const filtered = submissions.filter(submission =>
-            submission.text.toLowerCase().includes(query) ||
-            (submission.submittedByName && submission.submittedByName.toLowerCase().includes(query))
-        );
-        setFilteredSubmissions(filtered);
-    };
+                  },
+                });
+            
+                if (response.ok) {
+                  // Parse the response as a blob
+                  console.log("Response okay..")
+                  const blob = await response.blob();
+            
+                  // Create a temporary link element to initiate the download
+                  const url = window.URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = fileName; // Suggest the filename for the downloaded file
+                  document.body.appendChild(link);
+                  link.click();
+            
+                  // Clean up after download
+                  document.body.removeChild(link);
+                  window.URL.revokeObjectURL(url);
+            
+                  console.log("File downloaded successfully.");
+                }
+            
+                else{
+                  console.error("An error occured while downloading...",response.statusText)
+                }
+                
+              } catch (error) {
+                console.error("Something went wrong...:", error);
+              }
+        };
 
     useEffect(() => {
         fetchAllSubmissions();
@@ -140,17 +132,6 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
                 </button>
             </div>
 
-            {/* Search Bar */}
-            <div className="mb-3">
-                <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search submissions by username or submission-text"
-                    value={searchQuery}
-                    onChange={handleSearch}
-                />
-            </div>
-
             <div
                 className="modal fade"
                 id="uploadSubmissionModal"
@@ -172,17 +153,17 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
                             ></button>
                         </div>
                         <div className="modal-body">
-                            <input
-                                type="text"
+                            <input 
+                                type="text" 
                                 className="form-control mb-3"
-                                onChange={(e) => setSubmissionText(e.target.value)}
-                                value={submissionText}
+                                onChange={(e) => setSubmissionText(e.target.value)} 
+                                value={submissionText} 
                                 placeholder="Enter submission text here"
                             />
-                            <input
-                                type="file"
-                                className="form-control"
-                                onChange={(e) => setFile(e.target.files[0])}
+                            <input 
+                                type="file" 
+                                className="form-control" 
+                                onChange={(e) => setFile(e.target.files[0])} 
                             />
                         </div>
                         <div className="modal-footer">
@@ -193,13 +174,14 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
                             >
                                 Cancel
                             </button>
-                            <button
-                                type="button"
-                                onClick={handleUploadSubmission}
-                                className="btn btn-primary"
+                            <button 
+                                type="button" 
+                                disabled={!isAdmin} 
+                                onClick={handleUploadSubmission} 
+                                className="btn btn-primary" 
                                 data-bs-dismiss="modal"
                             >
-                                Submit
+                                Upload
                             </button>
                         </div>
                     </div>
@@ -208,9 +190,9 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
 
             {loading && <Spinner />}
 
-            {filteredSubmissions.length > 0 ? (
+            {submissions.length > 0 ? (
                 <ul className="submissions-list row">
-                    {filteredSubmissions.map((submission) => (
+                    {submissions.map((submission) => (
                         <li key={submission.assignmentSubmissionId} className="col-md-4 mb-4">
                             <div className="card shadow-sm">
                                 <div className="card-body">
@@ -229,7 +211,7 @@ function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) 
                                     </p>
                                     <p className="card-text">
                                         {submission.text} by{" "}
-                                        <strong>{submission.submittedByName || "someone"}</strong>
+                                        <strong>{submission.submittedBy?.fullName || "someone"}</strong>
                                     </p>
                                 </div>
                             </div>

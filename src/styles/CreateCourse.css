@@ -1,81 +1,95 @@
-/* Container Styling */
-.create-course-container {
+/* General styles for the dashboard */
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+}
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.dashboard-header {
+    background-color: #5c6bc0; /* Google Classroom-inspired blue */
+    color: white;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.dashboard-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Card for the Create Course form */
+.create-course-card {
+    background-color: white;
+    max-width: 400px;
     width: 100%;
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 2rem;
-    background-color: #f9f9f9;
-    border-style: solid;
-    border-color: #c6c2c2;
+    padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Heading Styling */
-.create-course-heading {
     text-align: center;
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
 }
 
-/* Form Styling */
+/* Form and input styling */
 .create-course-form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 16px;
 }
 
-/* Input Fields Styling */
 .input-field {
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    transition: border-color 0.3s ease;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
 }
 
 .input-field:focus {
-    border-color: #007bff;
+    border-color: #5c6bc0;
     outline: none;
 }
 
-/* Submit Button Styling */
 .submit-btn {
-    padding: 12px 20px;
-    background-color: #007bff;
+    background-color: #5c6bc0;
     color: white;
-    font-size: 16px;
     border: none;
-    border-radius: 5px;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.2s;
 }
 
 .submit-btn:hover {
-    background-color: #0056b3;
+    background-color: #3f51b5;
 }
 
-/* Alert Styling */
-.alert {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-}
-
-/* Back Link Styling */
 .return-link {
+    margin-top: 10px;
     display: inline-block;
-    margin-top: 20px;
-    text-align: center;
-    font-size: 16px;
-    color: #007bff;
+    color: #5c6bc0;
     text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
 }
 
 .return-link:hover {
-    text-decoration: underline;
+    color: #3f51b5;
 }

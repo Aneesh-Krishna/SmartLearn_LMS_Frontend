@@ -10,7 +10,7 @@ class SignalRService {
   // Connect to the SignalR Hub
   async connect() {
     this.connection = new HubConnectionBuilder()
-      .withUrl('https://your-api-url/chatHub', {
+      .withUrl('http://localhost:5116/chatHub', {
         accessTokenFactory: () => localStorage.getItem('jwtToken')  // If you're using JWT for authentication
       })
       .build();

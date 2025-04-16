@@ -3,9 +3,10 @@ import { NavLink } from "react-router-dom";
 import Spinner from './Loading';
 import { jwtDecode } from "jwt-decode";
 import { deleteAssignment, downloadAssignmentFile, fetchAllAssignments, uploadAssignment } from "../services/AssignmentService";
+import "../styles/Assignments.css";
 
 function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId, setAssignmentText }) {
-    document.title = 'Assignments: Classroom-App';
+    document.title = 'Assignments: ClassroomApp'  
 
     const [formData, setFormData] = useState({
         text: "",
@@ -17,7 +18,6 @@ function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId
     const [isAdmin, setIsAdmin] = useState(false);
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
     const [deleteAssignmentName, setDeleteAssignmentName] = useState('');
     const [deleteAssignmentId, setDeleteAssignmentId] = useState(null);
 
@@ -46,17 +46,12 @@ function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId
     const handleUploadAssignment = async () => {
         try {
             setLoading(true);
-            setUploadProgress(0);
-            const newAssignment = await uploadAssignment(courseId, assignmentText, file, authToken, (progressEvent) => {
-                const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                setUploadProgress(percentCompleted);
-            });
+            const newAssignment = await uploadAssignment(courseId, assignmentText, file, authToken);
             setAssignments((prev) => [...prev, newAssignment]);
         } catch (error) {
             console.error("Error uploading assignment: ", error);
         } finally {
             setLoading(false);
-            setUploadProgress(0);
         }
     };
 
@@ -103,7 +98,7 @@ function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId
                 <ul className="row list-unstyled">
                     {assignments.map((assignment) => (
                         <li key={assignment.assignmentId} className="col-md-4 mb-4">
-                            <div className="card shadow-sm h-100 transition-transform">
+                            <div className="card shadow-sm h-100">
                                 <div className="card-body">
                                     <h5 className="card-title text-truncate"><b>{assignment.text}</b></h5>
                                     <p className="card-subtitle mb-2 text-muted">
@@ -111,7 +106,6 @@ function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId
                                             <button
                                                 className="btn btn-link p-0 text-decoration-none"
                                                 onClick={() => handleDownload(assignment.assignmentFileName)}
-                                                title="Download Assignment"
                                             >
                                                 {assignment.assignmentFileName}
                                             </button>
@@ -148,9 +142,7 @@ function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId
                     ))}
                 </ul>
             ) : (
-                <p className="text-center">
-                    <i className="bi bi-folder-x"></i> No assignments found!
-                </p>
+                <p className="text-center">No assignments found!</p>
             )}
 
             {/* Upload Assignment Modal */}
@@ -174,17 +166,6 @@ function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId
                                 className="form-control"
                                 onChange={(e) => setFile(e.target.files[0])}
                             />
-                            {uploadProgress > 0 && (
-                                <div className="progress mt-3">
-                                    <div
-                                        className="progress-bar progress-bar-striped progress-bar-animated"
-                                        role="progressbar"
-                                        style={{ width: `${uploadProgress}%` }}
-                                    >
-                                        {uploadProgress}%
-                                    </div>
-                                </div>
-                            )}
                         </div>
                         <div className="modal-footer">
                             <button className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
