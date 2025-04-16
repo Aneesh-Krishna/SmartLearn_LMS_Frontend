@@ -1,12 +1,12 @@
 // src/services/MaterialService.js
 
-const BASE_URL = "https://localhost:7110/api/material"; // Replace with your API URL
+const BASE_URL = "http://localhost:5116/api/material"; // Replace with your API URL
 
 // Fetch all materials for a course
 export const fetchMaterials = async (courseId, authToken) => {
   
   try{
-    const response = await fetch(`https://localhost:7110/api/material/${courseId}/GetMaterials`, {
+    const response = await fetch(`http://localhost:5116/api/material/${courseId}/GetMaterials`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -98,7 +98,7 @@ export const deleteMaterial = async (materialId, authToken) => {
 
 export const downloadMaterial = async (fileName, authToken) => {
   try {
-    const response = await fetch(`https://localhost:7110/api/file/${fileName}`, {
+    const response = await fetch(`http://localhost:5116/api/file/${fileName}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${authToken}`,

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
+import "../styles/CourseDetails.css"; // Include a separate CSS file for styles
 import { NavLink, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import Spinner from './Loading';
-import '../styles/CourseDetails.css';
+import { jwtDecode } from "jwt-decode";
 
 function CourseDetails({ authToken, courseId, courseName, admin, adminId, description }) {
-    document.title = 'Course Details: Assignment App';
+    document.title = 'Course-details: Assignment-App';
 
     const navigate = useNavigate();
 
@@ -18,19 +18,25 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
 
     const disabledRemoveButton = async (authToken) => {
         const decodedToken = jwtDecode(authToken);
-        setIsAdmin(adminId === decodedToken.sub);
+        if (adminId === decodedToken.sub) {
+            setIsAdmin(true)
+        }
+        else {
+            console.log("Not the admin..")
+        }
     }
 
     const fetchCourses = async () => {
         try {
-            setLoading(true);
-            const response = await fetch(`https://localhost:7110/api/course/${courseId}/members`, {
+            setLoading(true); // Set loading to true before fetching data
+            const response = await fetch(`http://localhost:5116/api/course/${courseId}/members`, {
                 method: "GET",
                 headers: { Authorization: `Bearer ${authToken}` },
             });
 
             if (response.ok) {
-                const data = await response.json();
+                const data = await response.json(); // Parse the response JSON
+                // console.log("Fetched courses:", data);
                 setMembers(data?.$values || []);
             } else {
                 console.error("Failed to fetch courses:", response.statusText);
@@ -38,7 +44,7 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
         } catch (error) {
             console.error("Error fetching courses:", error);
         } finally {
-            setLoading(false);
+            setLoading(false); // Set loading to false after fetching data
         }
     };
 
@@ -49,20 +55,24 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
 
     const handleDelete = async (e) => {
         e.preventDefault()
+
         try {
-            const response = await fetch(`https://localhost:7110/api/course/${courseId}`, {
+            const response = await fetch(`http://localhost:5116/api/course/${courseId}`, {
                 method: "DELETE",
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${authToken}`,
                 },
             })
 
             if (response.ok) {
+                console.log("Course deleted!")
                 navigate('/courses')
-            } else {
-                console.error("Failed to delete the course: " + response.statusText)
             }
-        } catch (error) {
+            else {
+                console.error("Failed to delete the course!" + response.statusText)
+            }
+        }
+        catch (error) {
             console.error("Something went wrong... ", error)
         }
     }
@@ -72,7 +82,7 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
         if (!searchUserName.trim()) return;
 
         try {
-            const response = await fetch(`https://localhost:7110/api/account/${searchUserName}/users`, {
+            const response = await fetch(`http://localhost:5116/api/account/${searchUserName}/users`, {
                 method: "GET",
                 headers: { Authorization: `Bearer ${authToken}` },
             });
@@ -80,22 +90,26 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             if (response.ok) {
                 const data = await response.json()
                 setSearchUsernameResults(data?.$values || [])
-            } else {
+            }
+            else {
                 const errorData = await response.json()
                 console.error(errorData)
             }
-        } catch (error) {
+
+        }
+        catch (error) {
             console.error("Something went wrong...", error);
         }
     }
 
     const handleAddUser = async (e) => {
         e.preventDefault()
+
         try {
             const form = new FormData()
             form.append('newUserId', selectedUserId)
 
-            const response = await fetch(`https://localhost:7110/api/course/${courseId}/AddMember`, {
+            const response = await fetch(`http://localhost:5116/api/course/${courseId}/AddMember`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -106,19 +120,22 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             if (response.ok) {
                 setSelectedUserId('')
                 fetchCourses()
-            } else {
+            }
+            else {
                 const errorData = await response.json()
                 console.error(errorData)
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.error("Something went wrong...", error)
         }
     }
 
     const handleRemoveUser = async (e) => {
         e.preventDefault()
+
         try {
-            const response = await fetch(`https://localhost:7110/api/course/${selectedUserId}/RemoveMember`, {
+            const response = await fetch(`http://localhost:5116/api/course/${selectedUserId}/RemoveMember`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -128,17 +145,19 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             if (response.ok) {
                 setSelectedUserId('')
                 fetchCourses()
-            } else {
+            }
+            else {
                 const errorData = await response.json()
                 console.error(errorData)
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.error("Something went wrong...", error);
         }
     }
 
     return (
-        <div className="course-details-container">
+        <div className="course-details-container" style={{ marginTop: 50 }}>
             <div className="course-header">
                 <h1 className="course-title">{courseName}</h1>
                 <p className="course-admin">Admin: <strong>{admin}</strong></p>
@@ -146,18 +165,8 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             </div>
 
             <div className="course-members">
-                <h2>
-                    Members
-                    {isAdmin && (
-                        <button 
-                            onClick={() => (setSearchUserName(''), setSearchUsernameResults(''))} 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#staticBackdrop"
-                            className="add-member-btn"
-                        >
-                            Add Member
-                        </button>
-                    )}
+                <h2>Members
+                    <button disabled={!isAdmin} onClick={() => (setSearchUserName(''), setSearchUsernameResults(''))} data-bs-toggle="modal" data-bs-target="#staticBackdrop">➕</button>
                 </h2>
                 {loading ? (
                     <Spinner />
@@ -167,16 +176,7 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
                             <li key={member.id} className="member-item">
                                 <span className="member-icon">👤</span>
                                 {member.name}
-                                {isAdmin && (
-                                    <button 
-                                        className="remove-icon" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#staticBackdropRemove" 
-                                        onClick={() => setSelectedUserId(member.memberId)}
-                                    >
-                                        Remove
-                                    </button>
-                                )}
+                                <span className="remove-icon" type="button" title={isAdmin ? "" : "Admin only!"} style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }} data-bs-toggle="modal" data-bs-target="#staticBackdropRemove" onClick={() => (setSelectedUserId(member.memberId))}>❌</span>
                             </li>
                         ))}
                     </ul>
@@ -203,35 +203,33 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h2 className="modal-title" id="staticBackdropLabel">Add Members</h2>
-                            <form className="search-form" onSubmit={handleSearchUser}>
-                                <input 
-                                    className="search-input" 
-                                    onChange={(e) => (setSearchUserName(e.target.value), setSearchUsernameResults(''))} 
-                                    type="search" 
-                                    placeholder="Search for users" 
-                                    value={searchUserName} 
-                                    aria-label="Search" 
-                                />
-                                <button className="search-button" type="submit">Search</button>
-                            </form>
+                            <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                                Add Members
+                                <form className="d-flex" role="search" onSubmit={handleSearchUser}>
+                                    <input className="form-control me-2" onChange={(e) => (setSearchUserName(e.target.value), setSearchUsernameResults(''))} type="search" placeholder="Search for users" value={searchUserName} aria-label="Search" />
+                                    <button className="btn btn-outline-success" type="submit">Search</button>
+                                </form>
+                            </h1>
                         </div>
                         <div className="modal-body">
-                            {searchUserNameResults.length > 0 ? (
-                                <ul className="search-results-list">
+                            {searchUserNameResults.length > 0 ?
+                                (<ul className="list-group">
                                     {searchUserNameResults.map((user) => (
-                                        <li 
+                                        <li
                                             key={user.id}
-                                            className={`search-result-item ${selectedUserId === user.id ? 'selected' : ''}`}
+                                            className={`list-group-item`}
                                             onClick={() => setSelectedUserId(user.id)}
+                                            style={{ cursor: 'pointer' }}
                                         >
-                                            {user.userName}
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                {user.userName}
+                                            </div>
                                         </li>
                                     ))}
-                                </ul>
-                            ) : (
-                                <p>No such user found!</p>
-                            )}
+                                </ul>) : (
+                                    <p>No such user found!</p>
+                                )
+                            }
                         </div>
                         <div className="modal-footer">
                             <button type="button" onClick={() => (setSearchUserName(''), setSearchUsernameResults(''))} className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -242,38 +240,37 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             </div>
 
             <div className="course-actions">
-                {isAdmin && (
-                    <>
-                        <NavLink to="/updateCourse" className="action-link">Edit</NavLink>
-                        <button className="action-link delete-btn" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                            Delete
-                        </button>
-                    </>
-                )}
-                <NavLink to="/meetings" className="action-link">Meetings</NavLink>
-                <NavLink to="/courseChats" className="action-link">Chats</NavLink>
-                <NavLink to="/materials" className="action-link">Materials</NavLink>
-                <NavLink to="/assignments" className="action-link">Assignments</NavLink>
-                <NavLink to="/quiz" className="action-link">Quiz</NavLink>
-                <NavLink to="/courses" className="action-link">Back to Courses</NavLink>
-            </div>
+                <NavLink to="/updateCourse" className="return-link mx-3" title={isAdmin ? "" : "Admin only!"} style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }}>Edit</NavLink>
+                <NavLink to="/deleteCourse" className="return-link mx-3 "
+                    title={isAdmin ? "" : "Admin only!"}
+                    style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }}
+                    data-bs-toggle="modal" data-bs-target="#exampleModal"
+                >
+                    Delete
+                </NavLink>
 
-            <div className="modal fade" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-body">
-                            Are you sure you want to delete {courseName}?
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" disabled={!isAdmin} onClick={handleDelete} className="btn btn-danger" data-bs-dismiss="modal">Delete</button>
+                <div className="modal fade" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-body">
+                                Are you sure you want to delete {courseName}?
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" disabled={!isAdmin} onClick={handleDelete} className="btn btn-danger" data-bs-dismiss="modal">Delete </button>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {/*<NavLink to="/deleteCourse" className="return-link">Delete</NavLink>*/}
+                <NavLink to="/courseChats" className="return-link mx-3">Chats</NavLink>
+                <NavLink to="/materials" className="return-link mx-3">Materials</NavLink>
+                <NavLink to="/assignments" className="return-link mx-3">Assignments</NavLink>
+                <NavLink to="/courses" className="return-link mx-3">Back to Courses</NavLink>
             </div>
+
         </div>
     );
 }
 
 export default CourseDetails;
-

@@ -5,7 +5,7 @@ import '../styles/CreateCourse.css'; // Import the CSS file
 
 function UpdateCourse({authToken, courseId, courseName, setCourseName, description, setDescription, setLoading}){
 
-    document.title = 'Update-Course: Classroom-App'
+    document.title = 'Update-Course: Assignment-App'
 
     const [formData, setFormData] = useState({
         courseName: courseName,
@@ -29,7 +29,7 @@ function UpdateCourse({authToken, courseId, courseName, setCourseName, descripti
             const form = new FormData();
             form.append('courseName', formData.courseName);
             form.append('description', formData.description);
-            const response = await fetch(`https://localhost:7110/api/course/${courseId}/UpdateCourse`, {
+            const response = await fetch(`http://localhost:5116/api/course/${courseId}/UpdateCourse`, {
                 method: 'PUT',
                 headers: { 
                     'Authorization': `Bearer ${authToken}`,

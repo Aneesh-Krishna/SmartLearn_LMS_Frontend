@@ -2,7 +2,7 @@ import React from "react";
 
 function DeleteCourse({authToken, courseId, courseName}){
 
-    document.title = 'Delete-Course: Classroom-App'
+    document.title = 'Delete-Course: Assignment-App'
 
     return(
         <>

@@ -1,0 +1,136 @@
+/* Only apply these styles when the body has the register-page class */
+body.login-page {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #eef2f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Styles for the register container */
+.login-container {
+  width: 100%;
+  max-width: 500px; /* Ensure the container has a max width */
+  padding: 20px;
+  background-color: white; /* Optional: Add a background color */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better visuals */
+  border-radius: 8px; /* Optional: Add rounded corners */
+}
+  
+  .login-box {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+  }
+  
+  .login-header {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+  .icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    background: #e0f7fa;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    
+  }
+  
+  .login-icon {
+    font-size: 24px;
+    color: #00796b;
+    position: relative; /* Centers the icon within the container */
+    top: 0px; /* Reset top alignment */
+    left: 0; /* Reset left alignment */
+  }
+  
+  .login-header h2 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .login-header p {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .error-message {
+    background-color: #fdecea;
+    color: #d93025;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .login-form .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .login-form label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  .login-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .login-form input:focus {
+    border-color: #00796b;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 121, 107, 0.2);
+  }
+  
+  .submit-button {
+    width: 100%;
+    padding: 10px;
+    background: #00796b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  
+  .submit-button:hover {
+    background: #004d40;
+  }
+  
+  .submit-button:disabled {
+    background: #ddd;
+    cursor: not-allowed;
+  }
+  
+  .login-footer {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .register-link {
+    background: none;
+    color: #00796b;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  
