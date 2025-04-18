@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Menu, Home, BookOpen, Settings, ChevronDown, LogOut, SortAsc, Library } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 const Navigation = ({ authToken, setAuthToken, onSort }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -8,17 +9,20 @@ const Navigation = ({ authToken, setAuthToken, onSort }) => {
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const isHomePage = location.pathname === '/home' || location.pathname === '/courses';
+
   const handleLogout = async () => {
     try {
       const response = await fetch('http://localhost:5116/api/account/logout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`, 
+          'Authorization': `Bearer ${authToken}`,
         },
         credentials: 'include',
       });
-  
+
       if (response.ok) {
         setAuthToken(null);
         navigate('/login');
@@ -54,34 +58,36 @@ const Navigation = ({ authToken, setAuthToken, onSort }) => {
           </NavLink>
         </div>
 
-        <div className="nav-center">
-          <div className="sort-dropdown">
-            <button 
-              className="sort-button"
-              onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-            >
-              <SortAsc size={20} />
-              <span>Sort</span>
-              <ChevronDown size={16} />
-            </button>
-            {isSortDropdownOpen && (
-              <div className="sort-menu">
-                <button 
-                  className="sort-option" 
-                  onClick={() => handleSort('courseName')}
-                >
-                  Sort by Course Name
-                </button>
-                <button 
-                  className="sort-option" 
-                  onClick={() => handleSort('faculty')}
-                >
-                  Sort by Faculty
-                </button>
-              </div>
-            )}
+        {isHomePage &&
+          <div className="nav-center">
+            <div className="sort-dropdown">
+              <button
+                className="sort-button"
+                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+              >
+                <SortAsc size={20} />
+                <span>Sort</span>
+                <ChevronDown size={16} />
+              </button>
+              {isSortDropdownOpen && (
+                <div className="sort-menu">
+                  <button
+                    className="sort-option"
+                    onClick={() => handleSort('courseName')}
+                  >
+                    Sort by Course Name
+                  </button>
+                  <button
+                    className="sort-option"
+                    onClick={() => handleSort('faculty')}
+                  >
+                    Sort by Faculty
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        }
 
         <div className="nav-end">
           <div
@@ -119,6 +125,13 @@ const Navigation = ({ authToken, setAuthToken, onSort }) => {
         >
           <Library size={20} />
           <span>Library Materials</span>
+        </NavLink>
+
+        <NavLink
+          to="/documentAnalysis"
+          className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}
+        >
+          <span>Document analysis</span>
         </NavLink>
 
         <NavLink

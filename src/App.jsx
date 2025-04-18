@@ -15,7 +15,7 @@ import MaterialsPage from './components/MaterialsPage';
 import SubmitAssignment from './components/SubmitAssignment';
 import CourseChats from './components/CourseChats';
 import LibraryMaterials from './components/LibraryMaterials';
-
+import DocumentAnalysisBot from './components/DocumentAnalysisBot.jsx';
 
 function App() {
   const [authToken, setAuthToken] = useState(null)
@@ -190,6 +190,12 @@ function App() {
               <LibraryMaterials
                 authToken={authToken}
               />
+            }
+          />
+          <Route
+            path="/documentAnalysis"
+            element={
+              <DocumentAnalysisBot />
             }
           />
 
