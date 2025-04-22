@@ -156,6 +156,31 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
         }
     }
 
+    const handleLeaveCourse = async (e) => {
+        e.preventDefault();
+
+        try {
+            const response = await fetch(`http://localhost:5116/api/course/${courseId}/leaveCourse`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.ok) {
+                navigate('/courses');
+            }
+            else {
+                const errorData = await response.json()
+                console.error(errorData)
+            }
+        }
+
+        catch (error) {
+            console.error("Something went wrong... ", error);
+        }
+    }
+
     return (
         <div className="course-details-container" style={{ marginTop: 50 }}>
             <div className="course-header">
@@ -266,6 +291,9 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
                 <NavLink to="/courseChats" className="return-link mx-3">Chats</NavLink>
                 <NavLink to="/materials" className="return-link mx-3">Materials</NavLink>
                 <NavLink to="/assignments" className="return-link mx-3">Assignments</NavLink>
+                {/* <NavLink to="/meetings" className="return-link mx-3">Meetings</NavLink> */}
+                <a href="http://localhost:3001" target="_blank" style={{ textDecoration: 'none' }}>Meetings</a>
+                {!isAdmin && <button onClick={handleLeaveCourse} >Leave</button>}
                 <NavLink to="/courses" className="return-link mx-3">Back to Courses</NavLink>
             </div>
 
