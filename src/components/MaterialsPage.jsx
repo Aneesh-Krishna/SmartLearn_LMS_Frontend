@@ -67,9 +67,9 @@ function MaterialsPage({ courseId, authToken, adminId }) {
     }
   };
 
-  const handleDownload = async (materialUrl) => {
+  const handleDownload = async (materialName) => {
     try {
-      const response = await fetch(materialUrl, {
+      const response = await fetch(`http://localhost:5116/api/file/${materialName}`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -152,7 +152,7 @@ function MaterialsPage({ courseId, authToken, adminId }) {
               <div className="material-actions">
                 <button
                   className="action-button download-button"
-                  onClick={() => handleDownload(material.materialUrl)}
+                  onClick={() => handleDownload(material.materialName)}
                 >
                   Download
                 </button>

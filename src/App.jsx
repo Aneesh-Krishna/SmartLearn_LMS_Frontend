@@ -16,6 +16,8 @@ import SubmitAssignment from './components/SubmitAssignment';
 import CourseChats from './components/CourseChats';
 import LibraryMaterials from './components/LibraryMaterials';
 import DocumentAnalysisBot from './components/DocumentAnalysisBot.jsx';
+import Meeting from './components/Meeting.jsx';
+import SettingsPage from './components/SettingsPage.jsx';
 
 function App() {
   const [authToken, setAuthToken] = useState(null)
@@ -196,6 +198,25 @@ function App() {
             path="/documentAnalysis"
             element={
               <DocumentAnalysisBot />
+            }
+          />
+          <Route
+            path="/meetings"
+            element={
+              <Meeting
+                authToken={authToken}
+                adminId={adminId}
+                courseId={courseId}
+                courseName={courseName}
+              />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <SettingsPage
+                authToken={authToken}
+              />
             }
           />
 

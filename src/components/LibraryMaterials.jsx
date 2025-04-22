@@ -14,31 +14,55 @@ import {
 import '../styles/LibraryMaterials.css';
 
 function LibraryMaterials({ authToken }) {
-  const [materials, setMaterials] = useState([]);
+  const [materials, setMaterials] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isApplicationAdmin, setIsApplicationAdmin] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [uploaderIdFilter, setUploaderIdFilter] = useState('');
+  const [filterStatus, setFilterStatus] = useState('accepted');
+  // const [uploaderIdFilter, setUploaderIdFilter] = useState('');
   const [file, setFile] = useState(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  var filteredMaterials = [];
+
   useEffect(() => {
     fetchMaterials();
     checkAdminStatus();
   }, []);
 
-  const checkAdminStatus = () => {
+  useEffect(() => {
+    if (filterStatus === "accepted") {
+      fetchMaterials();
+    }
+    else if (filterStatus === "pending") {
+      fetchUploadPendingMaterials();
+    }
+  }, [filterStatus]);
+
+  const checkAdminStatus = async () => {
     try {
-      const decodedToken = jwtDecode(authToken);
-      setIsAdmin(decodedToken.role === 'Admin');
-    } catch (err) {
-      setError('Failed to verify admin status');
-      setIsAdmin(false);
+      const response = await fetch(`http://localhost:5116/api/account/isAdmin`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        },
+      });
+
+      if (response.ok) {
+        setIsApplicationAdmin(true);
+      }
+      else {
+        setIsApplicationAdmin(false);
+        console.log("An error occured while checking whether the user is admin...", response.text);
+      }
+    }
+    catch (err) {
+      setIsApplicationAdmin(false);
+      console.error("Something went wrong...", error);
     }
   };
 
@@ -46,53 +70,62 @@ function LibraryMaterials({ authToken }) {
     try {
       setLoading(true);
       setError('');
+
+      setMaterials(null);
+
       const response = await fetch('http://localhost:5116/api/LibraryMaterial', {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (response.ok) {
+        const data = await response.json();
+        setMaterials(data.$values || []);
 
-      const data = await response.json();
-      setMaterials(Array.isArray(data) ? data : []);
-    } catch (error) {
+      }
+      else {
+        console.log("An error occured while fetching the materials...", response.text);
+      }
+    }
+    catch (error) {
       setError('Failed to fetch materials: ' + error.message);
-    } finally {
+      console.error("Something went wrong while fetching the courses...", error);
+    }
+    finally {
       setLoading(false);
     }
   };
 
-  const fetchMaterialsByUploader = async () => {
-    if (!uploaderIdFilter) {
-      setError('Please enter an uploader ID');
-      return;
-    }
-
+  const fetchUploadPendingMaterials = async () => {
     try {
       setLoading(true);
-      setError('');
-      const response = await fetch(`http://localhost:5116/api/LibraryMaterial/${uploaderIdFilter}`, {
+      setMaterials(null);
+
+      const response = await fetch(`http://localhost:5116/api/LibraryMaterial/getUploadPendingMaterials`, {
+        method: "GET",
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (response.ok) {
+        const data = await response.json();
+        setMaterials(data.$values || []);
 
-      const data = await response.json();
-      setMaterials(Array.isArray(data) ? data : []);
-      setSuccess(`Showing materials for uploader ${uploaderIdFilter}`);
-    } catch (error) {
-      setError('Failed to fetch materials: ' + error.message);
-    } finally {
+      }
+      else {
+        console.log("An error occured while fetching upload pending materials...", response.text);
+      }
+    }
+    catch (error) {
+      console.error("Something went wrong while fetching upload pending materials...", error);
+    }
+    finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleUpload = async () => {
     if (!file) {
@@ -115,19 +148,24 @@ function LibraryMaterials({ authToken }) {
         body: formData,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
-      }
+      if (response.ok) {
+        const newMaterial = await response.json();
+        // setMaterials((prev) => [...prev, newMaterial]);
+        fetchMaterials();
+        setSuccess('Material uploaded successfully!');
+        setFile(null);
+        setUploadModalOpen(false);
 
-      const newMaterial = await response.json();
-      setMaterials((prev) => [...prev, newMaterial]);
-      setSuccess('Material uploaded successfully!');
-      setFile(null);
-      setUploadModalOpen(false);
-    } catch (error) {
+      }
+      else {
+        console.log("An error occured while uploading the material...", response.text);
+      }
+    }
+    catch (error) {
       setError('Failed to upload material: ' + error.message);
-    } finally {
+      console.error("Something went wrong while uploading the material...", error);
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -143,14 +181,16 @@ function LibraryMaterials({ authToken }) {
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (response.ok) {
+        setSuccess('Material accepted!');
+        fetchUploadPendingMaterials();
       }
-
-      setSuccess('Material accepted!');
-      fetchMaterials();
+      else {
+        console.log("An error occured while accepting the material...", response.text);
+      }
     } catch (error) {
       setError('Failed to accept material: ' + error.message);
+      console.error("Something went wrong while accepting the materiall...", error);
     } finally {
       setLoading(false);
     }
@@ -167,22 +207,27 @@ function LibraryMaterials({ authToken }) {
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      if (response.ok) {
+        setSuccess('Material rejected!');
+        fetchUploadPendingMaterials();
+        // setMaterials((prev) => prev.filter((m) => m.libraryMaterialUploadId !== materialId));
       }
-
-      setSuccess('Material rejected!');
-      setMaterials((prev) => prev.filter((m) => m.libraryMaterialUploadId !== materialId));
-    } catch (error) {
+      else {
+        console.log("An error occured while rejecting the material...", response.text);
+      }
+    }
+    catch (error) {
       setError('Failed to reject material: ' + error.message);
-    } finally {
+      console.error("Something went wrong while rejecting the material...", error);
+    }
+    finally {
       setLoading(false);
     }
   };
 
   const handleDownload = async (materialUrl, fileName) => {
     try {
-      const response = await fetch(materialUrl, {
+      const response = await fetch(`http://localhost:5116/api/file/${fileName}`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -220,17 +265,6 @@ function LibraryMaterials({ authToken }) {
     setIsSortDropdownOpen(false);
   };
 
-  const filteredMaterials = materials.filter((material) => {
-    const matchesSearch =
-      material.libraryMaterialUploadName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      material.uploader.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter =
-      filterStatus === 'all' ||
-      (filterStatus === 'accepted' && material.acceptedOrRejected === 'Accepted') ||
-      (filterStatus === 'pending' && material.acceptedOrRejected === '');
-    return matchesSearch && matchesFilter;
-  });
-
   return (
     <div className="library-materials-container">
       <div className="library-header">
@@ -250,15 +284,22 @@ function LibraryMaterials({ authToken }) {
             <Filter size={20} />
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => {
+                setFilterStatus(e.target.value);
+                if (e.target.value === "accepted") {
+                  fetchMaterials();
+                }
+                else {
+                  fetchUploadPendingMaterials();
+                }
+              }}
             >
-              <option value="all">All</option>
-              <option value="accepted">Accepted</option>
-              <option value="pending">Pending</option>
+              <option value="accepted" onClick={fetchMaterials}>Accepted</option>
+              <option value="pending" onClick={fetchUploadPendingMaterials}>Pending</option>
             </select>
           </div>
 
-          {isAdmin && (
+          {/* {isApplicationAdmin && (
             <div className="uploader-filter">
               <Filter size={20} />
               <input
@@ -274,7 +315,7 @@ function LibraryMaterials({ authToken }) {
                 Clear
               </button>
             </div>
-          )}
+          )} */}
 
           <div className="sort-dropdown">
             <button
@@ -323,9 +364,9 @@ function LibraryMaterials({ authToken }) {
           <div className="loading-dot"></div>
           <div className="loading-dot"></div>
         </div>
-      ) : filteredMaterials.length > 0 ? (
+      ) : materials?.length > 0 ? (
         <div className="materials-grid">
-          {filteredMaterials.map((material, index) => (
+          {materials?.map((material, index) => (
             <div key={material.libraryMaterialUploadId} className="material-card" style={{ animationDelay: `${index * 0.1}s` }}>
               <div className="material-icon">
                 <FileText size={24} />
@@ -334,13 +375,12 @@ function LibraryMaterials({ authToken }) {
                 <h3>{material.libraryMaterialUploadName}</h3>
                 <p>Uploaded by: {material.uploader || 'Unknown'}</p>
                 <span
-                  className={`status ${
-                    material.acceptedOrRejected
-                      ? material.acceptedOrRejected.toLowerCase()
-                      : 'pending'
-                  }`}
+                  className={`status ${material.acceptedOrRejected
+                    ? material.acceptedOrRejected.toLowerCase()
+                    : 'pending'
+                    }`}
                 >
-                  {material.acceptedOrRejected || 'Pending'}
+                  {filterStatus === "accepted" ? 'Accepted' : 'Pending'}
                 </span>
               </div>
               <div className="material-actions">
@@ -356,7 +396,7 @@ function LibraryMaterials({ authToken }) {
                 >
                   <Download size={20} />
                 </button>
-                {isAdmin && material.acceptedOrRejected === '' && (
+                {isApplicationAdmin && material.acceptedOrRejected === '' && (
                   <>
                     <button
                       className="action-button accept"
