@@ -101,7 +101,6 @@ function App() {
               courseId ? (
                 <CourseDetails
                   authToken={authToken}
-                  setAuthToken={setAuthToken}
                   courseId={courseId}
                   courseName={courseName}
                   admin={admin}
@@ -118,7 +117,6 @@ function App() {
             element={
               <CreateCourse
                 authToken={authToken}
-                setAuthToken={setAuthToken}
                 setLoading={setLoading}
               />
             }
@@ -128,7 +126,6 @@ function App() {
             element={
               <UpdateCourse
                 authToken={authToken}
-                setAuthToken={setAuthToken}
                 courseId={courseId}
                 courseName={courseName}
                 adminId={adminId}
@@ -144,7 +141,6 @@ function App() {
             element={
               <DeleteCourse
                 authToken={authToken}
-                setAuthToken={setAuthToken}
                 courseId={courseId}
                 courseName={courseName}
               />
@@ -156,7 +152,6 @@ function App() {
               <MaterialsPage
                 courseId={courseId}
                 authToken={authToken}
-                setAuthToken={setAuthToken}
                 adminId={adminId}
               />
             }
