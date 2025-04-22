@@ -20,7 +20,9 @@ import Meeting from './components/Meeting.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
 
 function App() {
-  const [authToken, setAuthToken] = useState(null)
+  const [authToken, setAuthToken] = useState(() => {
+    return localStorage.getItem('authToken') || null;
+  })
   const [showRegister, setShowRegister] = useState(true)
   const [courseId, setCourseId] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -68,12 +70,12 @@ function App() {
             element={
               <Courses
                 authToken={authToken}
+                setAuthToken={setAuthToken}
                 setCourseId={setCourseId}
                 setCourseName={setCourseName}
                 setAdmin={setAdmin}
                 setAdminId={setAdminId}
                 setDescription={setDescription}
-                setAuthToken={setAuthToken}
                 sortBy={sortBy}
               />
             }
@@ -83,12 +85,12 @@ function App() {
             element={
               <Courses
                 authToken={authToken}
+                setAuthToken={setAuthToken}
                 setCourseId={setCourseId}
                 setCourseName={setCourseName}
                 setAdmin={setAdmin}
                 setAdminId={setAdminId}
                 setDescription={setDescription}
-                setAuthToken={setAuthToken}
                 sortBy={sortBy}
               />
             }
@@ -113,7 +115,10 @@ function App() {
           <Route
             path="/createCourse"
             element={
-              <CreateCourse authToken={authToken} setLoading={setLoading} />
+              <CreateCourse
+                authToken={authToken}
+                setLoading={setLoading}
+              />
             }
           />
           <Route
