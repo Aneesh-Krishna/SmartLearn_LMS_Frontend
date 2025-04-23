@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, } from 'react-router-dom';
 import './App.css'
 import './styles/Navigation.css'
@@ -18,6 +18,7 @@ import LibraryMaterials from './components/LibraryMaterials';
 import DocumentAnalysisBot from './components/DocumentAnalysisBot.jsx';
 import Meeting from './components/Meeting.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
+import { jwtDecode } from 'jwt-decode';
 
 function App() {
   const [authToken, setAuthToken] = useState(() => {
@@ -33,11 +34,53 @@ function App() {
   const [assignmentId, setAssignmentId] = useState(null)
   const [assignmentText, setAssignmentText] = useState('')
   const [sortBy, setSortBy] = useState(null);
+  const [userName, setUserName] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+  const [isLogout, setIsLogout] = useState(false);
   const handleSort = (criteria) => {
     setSortBy(criteria);
   };
 
-  document.title = "SmartLearn_LMS"
+  var paramUserName;
+  var paramUserEmail;
+
+  document.title = "SmartLearn_LMS";
+
+  const getUserName = async () => {
+    try {
+      const userId = jwtDecode(authToken).sub;
+      const response = await fetch(`http://localhost:5116/api/account/${userId}/details`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      if (response.ok) {
+          const data = await response.json();
+
+        setUserName(data?.$values[0]?.userName);
+        setUserEmail(data?.$values[0]?.email);
+
+        paramUserName = data?.$values[0]?.userName;
+        paramUserEmail = data?.$values[0]?.email;
+
+        console.log(paramUserName);
+        console.log(paramUserEmail);
+
+      }
+      else {
+        setUserName(null);
+        setUserEmail(null);
+      }
+    }
+    catch (error) {
+      console.error("Something went wrong while fetching the user's details...", error);
+    }
+  }
+
+  useEffect(() => {
+    getUserName();
+  }, [authToken]);
 
   if (!authToken) {
     return (
@@ -53,7 +96,7 @@ function App() {
 
   return (
     <>
-      <Navigation setAuthToken={setAuthToken} onSort={handleSort} />
+      <Navigation authToken={authToken} setAuthToken={setAuthToken} onSort={handleSort} userName={userName} userEmail={userEmail} setIsLogout={setIsLogout} />
       <main className="app-main">
         <Routes>
           {/* Default route to courses */}

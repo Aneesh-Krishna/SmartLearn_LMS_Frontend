@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // Separate the logout logic into a standalone function
-export const handleLogout = async (setAuthToken, navigate, authToken) => {
+export const handleLogout = async (setAuthToken, navigate, authToken, setIsLogout) => {
   if (!setAuthToken) {
     console.error('setAuthToken is undefined');
     return;
@@ -13,14 +13,14 @@ export const handleLogout = async (setAuthToken, navigate, authToken) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`, 
+        'Authorization': `Bearer ${authToken}`,
       },
       credentials: 'include',
     });
 
     if (response.ok) {
-      setAuthToken(null); // Clear the token
-      navigate('/login'); // Navigate to the login page
+      setIsLogout(true);
+      setAuthToken(null);
     } else {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Failed to log out. Please try again.');

@@ -1,41 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Menu, Home, BookOpen, Settings, ChevronDown, LogOut, SortAsc, Library } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 
-const Navigation = ({ authToken, setAuthToken, onSort }) => {
+const Navigation = ({ authToken, setAuthToken, onSort, userName, userEmail, setIsLogout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  console.log(userName);
+  console.log(userEmail);
+
+  const getUserName = async (authToken) => {
+    try {
+      const userId = jwtDecode(authToken).sub.toString();
+      const response = await fetch(`http://localhost:5116/api/account/${userId}/details`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      debugger;
+      if (response.ok) {
+        return response;
+      }
+      else {
+        return null;
+      }
+    }
+    catch (error) {
+      console.error("Something went wrong while fetching the username...", error);
+      return null;
+    }
+  }
 
   const location = useLocation();
   const isHomePage = location.pathname === '/home' || location.pathname === '/courses';
 
   const handleLogout = async () => {
-    try {
-      const response = await fetch('http://localhost:5116/api/account/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-        },
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        setAuthToken(null);
-        navigate('/login');
-      } else if (response.status === 401) {
-        console.error('Unauthorized: Logging out due to expired session.');
-        setAuthToken(null);
-        navigate('/login');
-      } else {
-        console.error('Logout failed:', await response.text());
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+    navigate("/")
+    setAuthToken(null);
+    localStorage.removeItem("authToken");
   };
 
   const handleSort = (sortBy) => {
@@ -149,8 +155,8 @@ const Navigation = ({ authToken, setAuthToken, onSort }) => {
           <div className="dropdown-header">
             <div className="avatar large">JS</div>
             <div className="user-info">
-              <h4>John Smith</h4>
-              <p>john.smith@example.com</p>
+              <h4>{userName}</h4>
+              <p>{userEmail}</p>
             </div>
           </div>
           <div className="dropdown-divider" />
