@@ -48,7 +48,8 @@ function Login({ setAuthToken, setShowRegister }) {
         const data = await response.json();
         setAuthToken(data.token);
         localStorage.setItem('authToken', data.token);
-        <NavLink to="/courses" />;
+        window.location.reload();
+        <NavLink to="/" />;
       } else {
         const errorData = await response.json();
         setError(errorData);
