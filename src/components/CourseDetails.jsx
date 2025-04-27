@@ -265,14 +265,18 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             </div>
 
             <div className="course-actions">
-                <NavLink to="/updateCourse" className="return-link mx-3" title={isAdmin ? "" : "Admin only!"} style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }}>Edit</NavLink>
-                <NavLink to="/deleteCourse" className="return-link mx-3 "
-                    title={isAdmin ? "" : "Admin only!"}
-                    style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }}
-                    data-bs-toggle="modal" data-bs-target="#exampleModal"
-                >
-                    Delete
-                </NavLink>
+                {isAdmin &&
+                    <>
+                        <NavLink to="/updateCourse" className="return-link mx-3" title={isAdmin ? "" : "Admin only!"} style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }}>Edit</NavLink>
+                        <NavLink to="/deleteCourse" className="return-link mx-3 "
+                            title={isAdmin ? "" : "Admin only!"}
+                            style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }}
+                            data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        >
+                            Delete
+                        </NavLink>
+                    </>
+                }
 
                 <div className="modal fade" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog">
@@ -291,9 +295,29 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
                 <NavLink to="/courseChats" className="return-link mx-3">Chats</NavLink>
                 <NavLink to="/materials" className="return-link mx-3">Materials</NavLink>
                 <NavLink to="/assignments" className="return-link mx-3">Assignments</NavLink>
-                {/* <NavLink to="/meetings" className="return-link mx-3">Meetings</NavLink> */}
-                <a href="http://localhost:3001" target="_blank" style={{ textDecoration: 'none' }}>Meetings</a>
-                {!isAdmin && <button onClick={handleLeaveCourse} >Leave</button>}
+                <NavLink to="/quiz" className="return-link mx-3">Quiz</NavLink>
+                <NavLink to="http://localhost:3001" target="_blank" className="return-link mx-3">Meetings</NavLink>
+                {/* <a href="http://localhost:3001" target="_blank" style={{ textDecoration: 'none' }}>Meetings</a> */}
+                {!isAdmin &&
+                    <a className="return-link mx-3" style={{ textDecoration: 'none' }} data-bs-toggle="modal" data-bs-target="#leaveModal" >
+                        Leave
+                    </a>
+                }
+
+                <div className="modal fade" id="leaveModal" aria-labelledby="leaveModalLabel" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-body">
+                                Are you sure you want to leave the course?
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" disabled={isAdmin} onClick={handleLeaveCourse} className="btn btn-danger" data-bs-dismiss="modal">Leave </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <NavLink to="/courses" className="return-link mx-3">Back to Courses</NavLink>
             </div>
 

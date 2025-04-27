@@ -19,6 +19,10 @@ import DocumentAnalysisBot from './components/DocumentAnalysisBot.jsx';
 import Meeting from './components/Meeting.jsx';
 import SettingsPage from './components/SettingsPage.jsx';
 import { jwtDecode } from 'jwt-decode';
+import Quiz from './components/Quiz.jsx';
+import QuizRoom from './components/QuizRoom.jsx';
+import Questions from './components/Questions.jsx';
+import Options from './components/Options.jsx';
 
 function App() {
   const [authToken, setAuthToken] = useState(() => {
@@ -37,6 +41,11 @@ function App() {
   const [userName, setUserName] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
   const [isLogout, setIsLogout] = useState(false);
+  const [quizTitle, setQuizTitle] = useState('');
+  const [quizId, setQuizId] = useState(null);
+  const [quesitonId, setQuestionId] = useState(null);
+  const [questionText, setQuestionText] = useState('');
+
   const handleSort = (criteria) => {
     setSortBy(criteria);
   };
@@ -56,7 +65,7 @@ function App() {
         },
       });
       if (response.ok) {
-          const data = await response.json();
+        const data = await response.json();
 
         setUserName(data?.$values[0]?.userName);
         setUserEmail(data?.$values[0]?.email);
@@ -264,6 +273,54 @@ function App() {
             element={
               <SettingsPage
                 authToken={authToken}
+              />
+            }
+          />
+          <Route
+            path="/quiz"
+            element={
+              <Quiz
+                authToken={authToken}
+                adminId={adminId}
+                courseId={courseId}
+                courseName={courseName}
+                setQuizId={setQuizId}
+                quizTitle={quizTitle}
+                setQuizTitle={setQuizTitle}
+              />
+            }
+          />
+          <Route
+            path="/questions/:quizId"
+            element={
+              <Questions
+                authToken={authToken}
+                adminId={adminId}
+                quizTitle={quizTitle}
+                quesitonId={quesitonId}
+                setQuestionId={setQuestionId}
+                questionText={questionText}
+                setQuestionText={setQuestionText}
+              />
+            }
+          />
+          <Route
+            path="/options/:questionId"
+            element={
+              <Options
+                authToken={authToken}
+                adminId={adminId}
+                quizId={quizId}
+                questionText={questionText}
+              />
+            }
+          />
+          <Route
+            path="/quizRoom/:quizId/:duration"
+            element={
+              <QuizRoom
+                authToken={authToken}
+                quizTitle={quizTitle}
               />
             }
           />
