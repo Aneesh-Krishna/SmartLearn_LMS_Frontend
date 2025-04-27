@@ -100,7 +100,7 @@ const Navigation = ({ authToken, setAuthToken, onSort, userName, userEmail, setI
             className="user-profile"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <div className="avatar">JS</div>
+            <div className="avatar">{userName?.charAt(0)?.toUpperCase()}</div>
             <ChevronDown size={20} />
           </div>
         </div>
@@ -153,7 +153,7 @@ const Navigation = ({ authToken, setAuthToken, onSort, userName, userEmail, setI
       {isDropdownOpen && (
         <div className="user-dropdown">
           <div className="dropdown-header">
-            <div className="avatar large">JS</div>
+            <div className="avatar large">{userName?.charAt(0)?.toUpperCase()}</div>
             <div className="user-info">
               <h4>{userName}</h4>
               <p>{userEmail}</p>

@@ -225,8 +225,20 @@ function LibraryMaterials({ authToken }) {
     }
   };
 
-  const handleDownload = async (materialUrl, fileName) => {
+  const handleDownload = async (libraryMaterialUploadId, materialUrl, fileName) => {
     try {
+      const downloadHistoryResponse = await fetch(`http://localhost:5116/api/LibraryMaterial/${libraryMaterialUploadId}/downloadLibraryMaterialId`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      if (!downloadHistoryResponse.ok) {
+        console.error("Ann error occured while saving the download history...", downloadHistoryResponse.text);
+        return;
+      }
+
       const response = await fetch(`http://localhost:5116/api/file/${fileName}`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -368,10 +380,8 @@ function LibraryMaterials({ authToken }) {
         <div className="materials-grid">
           {materials?.map((material, index) => (
             <div key={material.libraryMaterialUploadId} className="material-card" style={{ animationDelay: `${index * 0.1}s` }}>
-              <div className="material-icon">
-                <FileText size={24} />
-              </div>
-              <div className="material-info">
+              <div className="material-cover">
+                <FileText size={48} />
                 <h3>{material.libraryMaterialUploadName}</h3>
                 <p>Uploaded by: {material.uploader || 'Unknown'}</p>
                 <span
@@ -388,6 +398,7 @@ function LibraryMaterials({ authToken }) {
                   className="action-button download"
                   onClick={() =>
                     handleDownload(
+                      material.libraryMaterialUploadId,
                       material.libraryMaterialUploadUrl,
                       material.libraryMaterialUploadName
                     )
@@ -446,8 +457,10 @@ function LibraryMaterials({ authToken }) {
               </button>
             </div>
             <div className="modal-body">
-              {error && <p className="error-message">{error}</p>}
-              {success && <p className="success-message">{success}</p>}
+              <div className="upload-area">
+                <Upload size={40} color="#2E7D32" />
+                <p>Drag & Drop or Click to Upload</p>
+                <p>Supported formats: PDF, DOCX, PPTX</p>
               <input
                 type="file"
                 onChange={(e) => {
@@ -459,6 +472,7 @@ function LibraryMaterials({ authToken }) {
                 className="file-input"
                 disabled={loading}
               />
+            </div>
             </div>
             <div className="modal-footer">
               <button
