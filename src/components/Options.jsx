@@ -4,7 +4,7 @@ import Spinner from './Loading';
 import { jwtDecode } from 'jwt-decode';
 import '../styles/Options.css'; // Import custom CSS
 
-function Options({ authToken, adminId, quizId, questionText }) {
+function Options({ authToken, adminId, admin, quizId, questionText }) {
     const [isAdmin, setIsAdmin] = useState(false);
     const [options, setOptions] = useState([]);
     const [optionText, setOptionText] = useState('');
@@ -163,13 +163,13 @@ function Options({ authToken, adminId, quizId, questionText }) {
                                 value={optionText}
                             />
                             <div className="form-check form-switch">
-                                <input 
-                                    className="form-check-input" 
-                                    type="checkbox" 
-                                    role="switch" 
-                                    id="flexSwitchCheckDefault" 
-                                    checked={optionsIsCorrect} 
-                                    onChange={() => setOptionIsCorrect(!optionsIsCorrect)} 
+                                <input
+                                    className="form-check-input"
+                                    type="checkbox"
+                                    role="switch"
+                                    id="flexSwitchCheckDefault"
+                                    checked={optionsIsCorrect}
+                                    onChange={() => setOptionIsCorrect(!optionsIsCorrect)}
                                 />
                                 <label className="form-check-label" htmlFor="flexSwitchCheckDefault">
                                     {optionsIsCorrect ? 'Correct' : 'Incorrect'}

@@ -181,6 +181,7 @@ function App() {
                 courseId={courseId}
                 courseName={courseName}
                 adminId={adminId}
+                admin={admin}
                 setCourseName={setCourseName}
                 description={description}
                 setDescription={setDescription}
@@ -216,6 +217,7 @@ function App() {
                 courseId={courseId}
                 courseName={courseName}
                 adminId={adminId}
+                admin={admin}
                 setAssignmentId={setAssignmentId}
                 setAssignmentText={setAssignmentText}
               />
@@ -227,6 +229,7 @@ function App() {
               <SubmitAssignment
                 authToken={authToken}
                 adminId={adminId}
+                admin={admin}
                 assignmentId={assignmentId}
                 assignmentText={assignmentText}
               />
@@ -238,6 +241,7 @@ function App() {
               <CourseChats
                 authToken={authToken}
                 adminId={adminId}
+                admin={admin}
                 courseId={courseId}
                 courseName={courseName}
               />
@@ -282,6 +286,7 @@ function App() {
               <Quiz
                 authToken={authToken}
                 adminId={adminId}
+                admin={admin}
                 courseId={courseId}
                 courseName={courseName}
                 setQuizId={setQuizId}
@@ -296,6 +301,7 @@ function App() {
               <Questions
                 authToken={authToken}
                 adminId={adminId}
+                admin={admin}
                 quizTitle={quizTitle}
                 quesitonId={quesitonId}
                 setQuestionId={setQuestionId}
@@ -310,6 +316,7 @@ function App() {
               <Options
                 authToken={authToken}
                 adminId={adminId}
+                admin={admin}
                 quizId={quizId}
                 questionText={questionText}
               />

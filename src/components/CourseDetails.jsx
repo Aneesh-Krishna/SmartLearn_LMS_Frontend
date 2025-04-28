@@ -1,42 +1,48 @@
-import { useEffect, useState } from "react";
-import "../styles/CourseDetails.css"; // Include a separate CSS file for styles
+import { useEffect, useState, useRef } from "react";
+import "../styles/CourseDetails.css";
+import "../styles/ChatOverlay.css";
 import { NavLink, useNavigate } from "react-router-dom";
 import Spinner from './Loading';
 import { jwtDecode } from "jwt-decode";
+import { HubConnectionBuilder } from "@microsoft/signalr";
 
 function CourseDetails({ authToken, courseId, courseName, admin, adminId, description }) {
     document.title = 'Course-details: SmartLearn_LMS';
-
     const navigate = useNavigate();
-
     const [loading, setLoading] = useState(false);
     const [members, setMembers] = useState([]);
     const [searchUserName, setSearchUserName] = useState('');
-    const [searchUserNameResults, setSearchUsernameResults] = useState([])
-    const [selectedUserId, setSelectedUserId] = useState('')
-    const [isAdmin, setIsAdmin] = useState(false)
+    const [searchUserNameResults, setSearchUsernameResults] = useState([]);
+    const [selectedUserId, setSelectedUserId] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    // Chat overlay state
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [chats, setChats] = useState(null);
+    const [error, setError] = useState(null);
+    const [file, setFile] = useState(null);
+    const [chatMessage, setChatMessage] = useState('');
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const chatBodyRef = useRef(null);
+    const connectionRef = useRef(null);
 
     const disabledRemoveButton = async (authToken) => {
         const decodedToken = jwtDecode(authToken);
         if (adminId === decodedToken.sub) {
-            setIsAdmin(true)
+            setIsAdmin(true);
         }
-        else {
-            console.log("Not the admin..")
-        }
-    }
+    };
 
     const fetchCourses = async () => {
         try {
-            setLoading(true); // Set loading to true before fetching data
+            setLoading(true);
             const response = await fetch(`http://localhost:5116/api/course/${courseId}/members`, {
                 method: "GET",
                 headers: { Authorization: `Bearer ${authToken}` },
             });
 
             if (response.ok) {
-                const data = await response.json(); // Parse the response JSON
-                // console.log("Fetched courses:", data);
+                const data = await response.json();
                 setMembers(data?.$values || []);
             } else {
                 console.error("Failed to fetch courses:", response.statusText);
@@ -44,7 +50,7 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
         } catch (error) {
             console.error("Error fetching courses:", error);
         } finally {
-            setLoading(false); // Set loading to false after fetching data
+            setLoading(false);
         }
     };
 
@@ -54,31 +60,25 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
     }, [authToken, adminId]);
 
     const handleDelete = async (e) => {
-        e.preventDefault()
-
+        e.preventDefault();
         try {
             const response = await fetch(`http://localhost:5116/api/course/${courseId}`, {
                 method: "DELETE",
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
                 },
-            })
+            });
 
             if (response.ok) {
-                console.log("Course deleted!")
-                navigate('/courses')
+                navigate('/courses');
             }
-            else {
-                console.error("Failed to delete the course!" + response.statusText)
-            }
+        } catch (error) {
+            console.error("Something went wrong... ", error);
         }
-        catch (error) {
-            console.error("Something went wrong... ", error)
-        }
-    }
+    };
 
     const handleSearchUser = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         if (!searchUserName.trim()) return;
 
         try {
@@ -88,26 +88,19 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             });
 
             if (response.ok) {
-                const data = await response.json()
-                setSearchUsernameResults(data?.$values || [])
+                const data = await response.json();
+                setSearchUsernameResults(data?.$values || []);
             }
-            else {
-                const errorData = await response.json()
-                console.error(errorData)
-            }
-
-        }
-        catch (error) {
+        } catch (error) {
             console.error("Something went wrong...", error);
         }
-    }
+    };
 
     const handleAddUser = async (e) => {
-        e.preventDefault()
-
+        e.preventDefault();
         try {
-            const form = new FormData()
-            form.append('newUserId', selectedUserId)
+            const form = new FormData();
+            form.append('newUserId', selectedUserId);
 
             const response = await fetch(`http://localhost:5116/api/course/${courseId}/AddMember`, {
                 method: "POST",
@@ -118,22 +111,16 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             });
 
             if (response.ok) {
-                setSelectedUserId('')
-                fetchCourses()
+                setSelectedUserId('');
+                fetchCourses();
             }
-            else {
-                const errorData = await response.json()
-                console.error(errorData)
-            }
+        } catch (error) {
+            console.error("Something went wrong...", error);
         }
-        catch (error) {
-            console.error("Something went wrong...", error)
-        }
-    }
+    };
 
     const handleRemoveUser = async (e) => {
-        e.preventDefault()
-
+        e.preventDefault();
         try {
             const response = await fetch(`http://localhost:5116/api/course/${selectedUserId}/RemoveMember`, {
                 method: "POST",
@@ -143,22 +130,16 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             });
 
             if (response.ok) {
-                setSelectedUserId('')
-                fetchCourses()
+                setSelectedUserId('');
+                fetchCourses();
             }
-            else {
-                const errorData = await response.json()
-                console.error(errorData)
-            }
-        }
-        catch (error) {
+        } catch (error) {
             console.error("Something went wrong...", error);
         }
-    }
+    };
 
     const handleLeaveCourse = async (e) => {
         e.preventDefault();
-
         try {
             const response = await fetch(`http://localhost:5116/api/course/${courseId}/leaveCourse`, {
                 method: "POST",
@@ -170,157 +151,511 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             if (response.ok) {
                 navigate('/courses');
             }
-            else {
-                const errorData = await response.json()
-                console.error(errorData)
-            }
-        }
-
-        catch (error) {
+        } catch (error) {
             console.error("Something went wrong... ", error);
         }
-    }
+    };
+
+    // Chat functionality
+    const formatSentTime = (sentTime) => {
+        const date = new Date(sentTime);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
+    };
+
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        setFile(selectedFile);
+    };
+
+    const fetchAllChats = async () => {
+        try {
+            const response = await fetch(`http://localhost:5116/api/chat/${courseId}/GetAllChats`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setChats(data?.$values || []);
+            } else {
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+        } catch (error) {
+            setError(error.message);
+            console.error("Error fetching chats:", error);
+        }
+    };
+
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+
+        try {
+            const form = new FormData();
+            form.append(`message`, chatMessage);
+            if (file) {
+                form.append(`file`, file);
+                if (chatMessage === "") {
+                    setChatMessage("Sent a file");
+                }
+            }
+
+            const response = await fetch(`http://localhost:5116/api/chat/${courseId}/SendMessage`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+                body: form,
+            });
+
+            if (response.ok) {
+                setChatMessage('');
+                setFile(null);
+                setRefreshTrigger((prev) => prev + 1);
+            } else {
+                console.error("An error occurred while sending the message...", response.text);
+            }
+        } catch (error) {
+            console.error("Something went wrong...", error);
+        }
+    };
+
+    const handleDownloadFile = async (fileName) => {
+        try {
+            const response = await fetch(`http://localhost:5116/api/file/${fileName}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            } else {
+                console.error("An error occurred while downloading...", response.statusText);
+            }
+        } catch (error) {
+            console.error("Something went wrong...:", error);
+        }
+    };
+
+    // Toggle chat overlay
+    const toggleChat = () => {
+        if (!isChatOpen) {
+            fetchAllChats();
+            initializeSignalR();
+        }
+        setIsChatOpen(!isChatOpen);
+    };
+
+    // Initialize SignalR connection
+    const initializeSignalR = () => {
+        if (!connectionRef.current) {
+            connectionRef.current = new HubConnectionBuilder()
+                .withUrl(`http://localhost:5116/chatHub`)
+                .build();
+
+            connectionRef.current
+                .start()
+                .then(() => {
+                    console.log("SignalR connected");
+
+                    connectionRef.current.invoke("JoinGroup", courseId.toString());
+
+                    // Listen for new messages from SignalR
+                    connectionRef.current.on("ReceiveMessage", (newMessage) => {
+                        console.log("Message received!");
+                        setChats(prevChats => {
+                            if (!prevChats) return [newMessage];
+                            const exists = prevChats.some(chat => chat.chatId === newMessage.chatId);
+                            return exists ? prevChats : [...prevChats, newMessage];
+                        });
+                    });
+                })
+                .catch(err => console.log("Error starting SignalR connection: ", err));
+        }
+    };
+
+    useEffect(() => {
+        // Clean up the SignalR connection when the component unmounts
+        return () => {
+            if (connectionRef.current) {
+                connectionRef.current.stop();
+                connectionRef.current = null;
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        // Scroll to the bottom of the chat body whenever new chats are added or sent
+        if (chatBodyRef.current && isChatOpen) {
+            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        }
+    }, [chats, isChatOpen]);
 
     return (
-        <div className="course-details-container" style={{ marginTop: 50 }}>
-            <div className="course-header">
-                <h1 className="course-title">{courseName}</h1>
-                <p className="course-admin">Admin: <strong>{admin}</strong></p>
-                <p className="course-description">{description}</p>
+        <div className="gc-course-details-container">
+            {/* Course Banner */}
+            <div className="gc-course-banner">
+                <div className="gc-course-banner-content">
+                    <h1 className="gc-course-title">{courseName}</h1>
+                    <p className="gc-course-section">{description}</p>
+                    <p className="gc-course-admin">Instructor: {admin}</p>
+                </div>
             </div>
 
-            <div className="course-members">
-                <h2>Members
-                    <button disabled={!isAdmin} onClick={() => (setSearchUserName(''), setSearchUsernameResults(''))} data-bs-toggle="modal" data-bs-target="#staticBackdrop">➕</button>
-                </h2>
-                {loading ? (
-                    <Spinner />
-                ) : members.length > 0 ? (
-                    <ul className="member-list">
-                        {members.map((member) => (
-                            <li key={member.id} className="member-item">
-                                <span className="member-icon">👤</span>
-                                {member.name}
-                                <span className="remove-icon" type="button" title={isAdmin ? "" : "Admin only!"} style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }} data-bs-toggle="modal" data-bs-target="#staticBackdropRemove" onClick={() => (setSelectedUserId(member.memberId))}>❌</span>
-                            </li>
-                        ))}
-                    </ul>
+            {/* Tab Navigation */}
+            <div className="gc-tabs-container">
+                <div className="gc-tab-list">
+                    <div className={`gc-tab-item ${isChatOpen ? 'active' : ''}`} onClick={toggleChat}>Chats</div>
+                    <NavLink to="/assignments" className="gc-tab-item">Classwork</NavLink>
+                    <NavLink to="/materials" className="gc-tab-item">Materials</NavLink>
+                    <NavLink to="/quiz" className="gc-tab-item">Quizzes</NavLink>
+                    <NavLink to="http://localhost:3001" target="_blank" className="gc-tab-item">Meet</NavLink>
+                    <div className="gc-tab-item active">People</div>
+                </div>
+            </div>
+
+            {/* Course Content */}
+            <div className="gc-content-container">
+                {/* Teachers Section */}
+                <div className="gc-section">
+                    <div className="gc-section-header">
+                        <h2>Instructor</h2>
+                    </div>
+                    <div className="gc-section-content">
+                        <div className="gc-person-item">
+                            <div className="gc-person-avatar">{admin.charAt(0)}</div>
+                            <div className="gc-person-info">
+                                <div className="gc-person-name">{admin}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Students Section */}
+                <div className="gc-section">
+                    <div className="gc-section-header">
+                        <h2>Students</h2>
+                        {isAdmin && (
+                            <button
+                                className="gc-icon-button"
+                                onClick={() => (setSearchUserName(''), setSearchUsernameResults([]))}
+                                data-bs-toggle="modal"
+                                data-bs-target="#staticBackdrop"
+                            >
+                                <span className="material-icons">person_add</span>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="gc-section-content">
+                        {loading ? (
+                            <div className="gc-loader-container">
+                                <Spinner />
+                            </div>
+                        ) : members.length > 0 ? (
+                            <div className="gc-people-list">
+                                {members.map((member) => (
+                                    <div key={member.id} className="gc-person-item">
+                                        <div className="gc-person-avatar">{member.name.charAt(0)}</div>
+                                        <div className="gc-person-info">
+                                            <div className="gc-person-name">{member.name}</div>
+                                        </div>
+                                        {isAdmin && (
+                                            <button
+                                                className="gc-icon-button gc-remove-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#staticBackdropRemove"
+                                                onClick={() => setSelectedUserId(member.memberId)}
+                                            >
+                                                <span className="material-icons">remove_circle_outline</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="gc-empty-state">
+                                <span className="material-icons gc-empty-icon">people</span>
+                                <p>No students in this class yet</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Course Actions */}
+            <div className="gc-course-actions">
+                <NavLink to="/courses" className="gc-button gc-button-text">
+                    <span className="material-icons">arrow_back</span>
+                    Back to Courses
+                </NavLink>
+
+                {isAdmin ? (
+                    <div className="gc-action-group">
+                        <button
+                            className="gc-button gc-button-text"
+                            data-bs-toggle="modal"
+                            data-bs-target="#exampleModal"
+                        >
+                            <span className="material-icons">delete</span>
+                            Delete Course
+                        </button>
+                        <NavLink to="/updateCourse" className="gc-button gc-button-text">
+                            <span className="material-icons">edit</span>
+                            Edit Course
+                        </NavLink>
+                    </div>
                 ) : (
-                    <p className="no-members-text">No Members!</p>
+                    <button
+                        className="gc-button gc-button-text gc-danger-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#leaveModal"
+                    >
+                        <span className="material-icons">exit_to_app</span>
+                        Leave Course
+                    </button>
                 )}
             </div>
 
-            <div className="modal fade" id="staticBackdropRemove" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-body">
-                            Are you sure you want to remove the user from {courseName}?
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" disabled={!isAdmin} onClick={handleRemoveUser} className="btn btn-danger" data-bs-dismiss="modal">Remove</button>
-                        </div>
+            {/* Chat Overlay */}
+            <div className={`gc-chat-overlay ${isChatOpen ? 'open' : ''}`}>
+                <div className="gc-chat-content">
+                    <div className="gc-chat-header">
+                        <h2 className="gc-chat-title">Chats</h2>
+                        <button className="gc-icon-button gc-close-btn" onClick={toggleChat}>
+                            <span className="material-icons">close</span>
+                        </button>
+                    </div>
+
+                    <div className="gc-chat-body" ref={chatBodyRef}>
+                        {error ? (
+                            <div className="gc-error">Failed to load chats: {error}</div>
+                        ) : chats === null ? (
+                            <div className="gc-loading">
+                                <span className="material-icons gc-loading-icon">sync</span>
+                                <p>Loading chats...</p>
+                            </div>
+                        ) : chats.length > 0 ? (
+                            <div className="gc-messages-list">
+                                {chats.map((chat) => (
+                                    <div key={chat.chatId} className="gc-chat-item" title={formatSentTime(chat.sentAt)}>
+                                        <div className="gc-chat-header">
+                                            <span className="gc-sender-name">{chat.senderName || "Bot"}</span>
+                                        </div>
+                                        <div className="gc-message gc-incoming">
+                                            <p>{chat.message || "No message content"}</p>
+                                            {chat.fileName && (
+                                                <div className="gc-chat-file">
+                                                    <span className="gc-file-label">File:</span>
+                                                    <button
+                                                        onClick={() => handleDownloadFile(chat.fileName)}
+                                                        className="gc-download-button"
+                                                    >
+                                                        {chat.fileName}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="gc-empty-chat">
+                                <span className="material-icons gc-empty-icon">forum</span>
+                                <p>No chats yet. Start a conversation!</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="gc-chat-footer">
+                        <form onSubmit={handleSendMessage} className="gc-chat-form">
+                            <label htmlFor="file-upload" className="gc-file-icon" title="Upload a file">
+                                {file ? (
+                                    <span className="material-icons gc-success-icon">check_circle</span>
+                                ) : (
+                                    <span className="material-icons">attach_file</span>
+                                )}
+                            </label>
+                            <input
+                                id="file-upload"
+                                type="file"
+                                className="gc-hidden"
+                                onChange={handleFileChange}
+                            />
+                            <input
+                                type="text"
+                                className="gc-message-input"
+                                placeholder="Type a message..."
+                                value={chatMessage}
+                                onChange={(e) => setChatMessage(e.target.value)}
+                            />
+                            <button type="submit" className="gc-send-button">
+                                <span className="material-icons">send</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            {/* Add Member Modal */}
+            <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                 <div className="modal-dialog">
-                    <div className="modal-content">
+                    <div className="modal-content gc-modal">
                         <div className="modal-header">
-                            <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                                Add Members
-                                <form className="d-flex" role="search" onSubmit={handleSearchUser}>
-                                    <input className="form-control me-2" onChange={(e) => (setSearchUserName(e.target.value), setSearchUsernameResults(''))} type="search" placeholder="Search for users" value={searchUserName} aria-label="Search" />
-                                    <button className="btn btn-outline-success" type="submit">Search</button>
-                                </form>
-                            </h1>
+                            <h1 className="modal-title fs-5" id="staticBackdropLabel">Invite students</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
-                            {searchUserNameResults.length > 0 ?
-                                (<ul className="list-group">
+                            <form className="gc-search-form" onSubmit={handleSearchUser}>
+                                <div className="gc-search-input-container">
+                                    <span className="material-icons gc-search-icon">search</span>
+                                    <input
+                                        className="gc-search-input"
+                                        onChange={(e) => (setSearchUserName(e.target.value), setSearchUsernameResults(''))}
+                                        type="search"
+                                        placeholder="Search for users"
+                                        value={searchUserName}
+                                    />
+                                </div>
+                                <button className="gc-button gc-button-contained" type="submit">Search</button>
+                            </form>
+
+                            {searchUserNameResults.length > 0 ? (
+                                <ul className="gc-search-results">
                                     {searchUserNameResults.map((user) => (
                                         <li
                                             key={user.id}
-                                            className={`list-group-item`}
+                                            className={`gc-search-result-item ${selectedUserId === user.id ? 'selected' : ''}`}
                                             onClick={() => setSelectedUserId(user.id)}
-                                            style={{ cursor: 'pointer' }}
                                         >
-                                            <div className="d-flex justify-content-between align-items-center">
-                                                {user.userName}
-                                            </div>
+                                            <div className="gc-person-avatar">{user.userName.charAt(0)}</div>
+                                            <div className="gc-person-name">{user.userName}</div>
+                                            {selectedUserId === user.id && (
+                                                <span className="material-icons gc-check-icon">check_circle</span>
+                                            )}
                                         </li>
                                     ))}
-                                </ul>) : (
-                                    <p>No such user found!</p>
+                                </ul>
+                            ) : (
+                                searchUserName && (
+                                    <div className="gc-empty-search">
+                                        <p>No matching users found</p>
+                                    </div>
                                 )
-                            }
+                            )}
                         </div>
                         <div className="modal-footer">
-                            <button type="button" onClick={() => (setSearchUserName(''), setSearchUsernameResults(''))} className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" disabled={!isAdmin} onClick={handleAddUser} className="btn btn-primary" data-bs-dismiss="modal">Add</button>
+                            <button type="button" className="gc-button gc-button-text" data-bs-dismiss="modal">Cancel</button>
+                            <button
+                                type="button"
+                                disabled={!selectedUserId}
+                                onClick={handleAddUser}
+                                className="gc-button gc-button-contained"
+                                data-bs-dismiss="modal"
+                            >
+                                Add
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="course-actions">
-                {isAdmin &&
-                    <>
-                        <NavLink to="/updateCourse" className="return-link mx-3" title={isAdmin ? "" : "Admin only!"} style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }}>Edit</NavLink>
-                        <NavLink to="/deleteCourse" className="return-link mx-3 "
-                            title={isAdmin ? "" : "Admin only!"}
-                            style={{ pointerEvents: isAdmin ? "auto" : "none", color: isAdmin ? "#007bff" : "gray" }}
-                            data-bs-toggle="modal" data-bs-target="#exampleModal"
-                        >
-                            Delete
-                        </NavLink>
-                    </>
-                }
-
-                <div className="modal fade" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-body">
-                                Are you sure you want to delete {courseName}?
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="button" disabled={!isAdmin} onClick={handleDelete} className="btn btn-danger" data-bs-dismiss="modal">Delete </button>
-                            </div>
+            {/* Remove Member Modal */}
+            <div className="modal fade" id="staticBackdropRemove" aria-labelledby="removeModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content gc-modal">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="removeModalLabel">Remove student</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            Are you sure you want to remove this student from {courseName}?
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="gc-button gc-button-text" data-bs-dismiss="modal">Cancel</button>
+                            <button
+                                type="button"
+                                onClick={handleRemoveUser}
+                                className="gc-button gc-button-contained gc-button-danger"
+                                data-bs-dismiss="modal"
+                            >
+                                Remove
+                            </button>
                         </div>
                     </div>
                 </div>
-                {/*<NavLink to="/deleteCourse" className="return-link">Delete</NavLink>*/}
-                <NavLink to="/courseChats" className="return-link mx-3">Chats</NavLink>
-                <NavLink to="/materials" className="return-link mx-3">Materials</NavLink>
-                <NavLink to="/assignments" className="return-link mx-3">Assignments</NavLink>
-                <NavLink to="/quiz" className="return-link mx-3">Quiz</NavLink>
-                <NavLink to="http://localhost:3001" target="_blank" className="return-link mx-3">Meetings</NavLink>
-                {/* <a href="http://localhost:3001" target="_blank" style={{ textDecoration: 'none' }}>Meetings</a> */}
-                {!isAdmin &&
-                    <a className="return-link mx-3" style={{ textDecoration: 'none' }} data-bs-toggle="modal" data-bs-target="#leaveModal" >
-                        Leave
-                    </a>
-                }
-
-                <div className="modal fade" id="leaveModal" aria-labelledby="leaveModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-body">
-                                Are you sure you want to leave the course?
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="button" disabled={isAdmin} onClick={handleLeaveCourse} className="btn btn-danger" data-bs-dismiss="modal">Leave </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <NavLink to="/courses" className="return-link mx-3">Back to Courses</NavLink>
             </div>
 
+            {/* Delete Course Modal */}
+            <div className="modal fade" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content gc-modal">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Delete course</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            Are you sure you want to delete <strong>{courseName}</strong>? This action cannot be undone.
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="gc-button gc-button-text" data-bs-dismiss="modal">Cancel</button>
+                            <button
+                                type="button"
+                                onClick={handleDelete}
+                                className="gc-button gc-button-contained gc-button-danger"
+                                data-bs-dismiss="modal"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Leave Course Modal */}
+            <div className="modal fade" id="leaveModal" aria-labelledby="leaveModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content gc-modal">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="leaveModalLabel">Leave course</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            Are you sure you want to leave <strong>{courseName}</strong>?
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="gc-button gc-button-text" data-bs-dismiss="modal">Cancel</button>
+                            <button
+                                type="button"
+                                onClick={handleLeaveCourse}
+                                className="gc-button gc-button-contained gc-button-danger"
+                                data-bs-dismiss="modal"
+                            >
+                                Leave
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

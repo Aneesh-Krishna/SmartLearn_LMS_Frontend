@@ -5,8 +5,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import DateTimeComponent from './DateTimeComponent';
 import '../styles/Quiz.css'; // Import custom CSS file
 
-function Quiz({ authToken, adminId, courseId, courseName, setQuizId, quizTitle, setQuizTitle }) {
-    const [quizzes, setQuizzes] = useState([]);
+function Quiz({ authToken, adminId, admin, courseId, courseName, setQuizId, quizTitle, setQuizTitle }) {
+    const [quizzes, setQuizzes] = useState([]); a
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [deleteQuizId, setDeleteQuizId] = useState(null);
@@ -70,14 +70,14 @@ function Quiz({ authToken, adminId, courseId, courseName, setQuizId, quizTitle, 
                 const modal = document.getElementById('newQuizModal');
                 const modalInstance = bootstrap.Modal.getInstance(modal);
                 modalInstance.hide();
-            } 
+            }
             else {
                 console.error("An error occurred while creating the quiz:", response.statusText);
             }
-        } 
+        }
         catch (error) {
             console.error("Something went wrong...", error);
-        } 
+        }
         finally {
             setLoading(false);
             setQuizTitle('');
@@ -96,14 +96,14 @@ function Quiz({ authToken, adminId, courseId, courseName, setQuizId, quizTitle, 
 
             if (response.ok) {
                 fetchQuizzes();
-            } 
+            }
             else {
                 console.error("An error occurred while deleting the quiz:", response.statusText);
             }
-        } 
+        }
         catch (error) {
             console.error("Something went wrong...", error);
-        } 
+        }
         finally {
             setLoading(false);
             setDeleteQuizId(null);
@@ -112,7 +112,7 @@ function Quiz({ authToken, adminId, courseId, courseName, setQuizId, quizTitle, 
     };
 
     const handleGenerateReport = async (generateReportQuizId) => {
-        try{    
+        try {
             setLoading(true)
 
             const respone = await fetch(`https://localhost:7110/api/report/${generateReportQuizId}/GenerateReport`, {
@@ -122,16 +122,16 @@ function Quiz({ authToken, adminId, courseId, courseName, setQuizId, quizTitle, 
                 },
             });
 
-            if(respone.ok){
+            if (respone.ok) {
                 setLoading(false)
                 alert("Report has been generated and sent to the Course's chat!")
             }
-            else{
+            else {
                 setLoading(false)
                 console.error("An error occured while generating reports: ", respone.statusText);
             }
         }
-        catch(error){
+        catch (error) {
             console.error("Something went wrong...", error);
             setLoading(false)
         }
@@ -184,13 +184,13 @@ function Quiz({ authToken, adminId, courseId, courseName, setQuizId, quizTitle, 
                                         >
                                             Participate
                                         </button>
-                                        
+
                                         {isAdmin && (
                                             <div className="button-group">
                                                 <button className="to-questions-btn" onClick={() => (setQuizId(quiz.quizId), setQuizTitle(quiz.quizTitle), navigate(`/questions/${quiz.quizId}`))}>
                                                     Questions
                                                 </button>
-                                                <button className="generate-report-btn" onClick={() => (setQuizId(quiz.quizId), setQuizTitle(quiz.quizTitle), handleGenerateReport(quiz.quizId) )}>
+                                                <button className="generate-report-btn" onClick={() => (setQuizId(quiz.quizId), setQuizTitle(quiz.quizTitle), handleGenerateReport(quiz.quizId))}>
                                                     Generate Report
                                                 </button>
                                                 <button

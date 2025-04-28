@@ -3,7 +3,7 @@ import Spinner from './Loading';
 import { NavLink } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) {
+function SubmitAssignment({ authToken, adminId, admin, assignmentId, assignmentText }) {
     document.title = 'Submissions: SmartLearn_LMS';
 
     const [submissions, setSubmissions] = useState([]);

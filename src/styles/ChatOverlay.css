@@ -1,0 +1,241 @@
+/* Chat Overlay Container */
+.gc-chat-overlay {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background-color: #fff;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+    transition: right 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .gc-chat-overlay.open {
+    right: 0;
+  }
+  
+  .gc-chat-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Chat Header */
+  .gc-chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: #f5f5f5;
+  }
+  
+  .gc-chat-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a73e8;
+  }
+  
+  .gc-close-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #5f6368;
+  }
+  
+  .gc-close-btn:hover {
+    color: #1a73e8;
+  }
+  
+  /* Chat Body */
+  .gc-chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background-color: #f9f9f9;
+  }
+  
+  .gc-messages-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .gc-chat-item {
+    max-width: 80%;
+    margin-bottom: 12px;
+  }
+  
+  .gc-chat-header {
+    margin-bottom: 4px;
+  }
+  
+  .gc-sender-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: #202124;
+  }
+  
+  .gc-message {
+    background-color: #e8f0fe;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .gc-message p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  
+  .gc-chat-file {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .gc-file-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #5f6368;
+  }
+  
+  .gc-download-button {
+    background: none;
+    border: none;
+    color: #1a73e8;
+    font-size: 13px;
+    padding: 0;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  .gc-download-button:hover {
+    color: #174ea6;
+  }
+  
+  /* Empty and Loading States */
+  .gc-empty-chat, 
+  .gc-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #5f6368;
+    text-align: center;
+  }
+  
+  .gc-empty-icon, 
+  .gc-loading-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #dadce0;
+  }
+  
+  .gc-loading-icon {
+    animation: spin 2s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .gc-error {
+    color: #d93025;
+    padding: 16px;
+    text-align: center;
+  }
+  
+  /* Chat Footer */
+  .gc-chat-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #fff;
+  }
+  
+  .gc-chat-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .gc-file-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5f6368;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+  }
+  
+  .gc-file-icon:hover {
+    background-color: #f1f3f4;
+    color: #1a73e8;
+  }
+  
+  .gc-success-icon {
+    color: #34a853;
+  }
+  
+  .gc-hidden {
+    display: none;
+  }
+  
+  .gc-message-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #dadce0;
+    border-radius: 24px;
+    font-size: 14px;
+    outline: none;
+  }
+  
+  .gc-message-input:focus {
+    border-color: #1a73e8;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+  }
+  
+  .gc-send-button {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .gc-send-button:hover {
+    background-color: #174ea6;
+  }
+  
+  .gc-send-button:disabled {
+    background-color: #dadce0;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 576px) {
+    .gc-chat-overlay {
+      width: 100%;
+      right: -100%;
+    }
+    
+    .gc-chat-item {
+      max-width: 90%;
+    }
+  }
