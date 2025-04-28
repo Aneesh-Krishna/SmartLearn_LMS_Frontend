@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import '../styles/LibraryMaterials.css';
+import RecommendedMaterials from './RecommendedMaterials';
 
 function LibraryMaterials({ authToken }) {
   const [materials, setMaterials] = useState(null);
@@ -26,6 +27,31 @@ function LibraryMaterials({ authToken }) {
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const Categories = [
+    "Science",
+    "Mathematics",
+    "Commerce",
+    "Arts",
+    "Fantasy",
+    "Thriller",
+    "Crime",
+    "Suspense",
+    "Fiction",
+    "Kids",
+    "Biography",
+    "Business",
+    "Health",
+    "Cooking",
+    "Horror",
+    "Romance",
+    "Social_Science",
+    "Travel",
+    "Sports",
+    "Agriculture",
+    "Self_Help"
+  ];
 
   var filteredMaterials = [];
 
@@ -140,7 +166,9 @@ function LibraryMaterials({ authToken }) {
       setLoading(true);
       setError('');
       setSuccess('');
-      const response = await fetch('http://localhost:5116/api/LibraryMaterial/upload-library-material', {
+      console.log(selectedCategory);
+      console.log(file);
+      const response = await fetch(`http://localhost:5116/api/LibraryMaterial/${selectedCategory}/upload-library-material`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${authToken}`,
@@ -166,6 +194,7 @@ function LibraryMaterials({ authToken }) {
       console.error("Something went wrong while uploading the material...", error);
     }
     finally {
+      setSelectedCategory(null);
       setLoading(false);
     }
   };
@@ -370,6 +399,10 @@ function LibraryMaterials({ authToken }) {
       {error && <p className="error-message">{error}</p>}
       {success && <p className="success-message">{success}</p>}
 
+      {!loading && materials?.length > 0 && (
+        <RecommendedMaterials authToken={authToken} />
+      )}
+
       {loading ? (
         <div className="loading-animation">
           <div className="loading-dot"></div>
@@ -457,22 +490,52 @@ function LibraryMaterials({ authToken }) {
               </button>
             </div>
             <div className="modal-body">
-              <div className="upload-area">
+              {/* Category dropdown as a separate section */}
+              <div className="category-selection mb-4">
+                <label htmlFor="category-select" className="form-label">Select Category</label>
+                <select
+                  id="category-select"
+                  className="form-select"
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  value={selectedCategory || ''}
+                  disabled={loading}
+                >
+                  <option value="">-- Select a Category --</option>
+                  {Categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Upload area as a separate section with position relative */}
+              <div className="upload-area position-relative">
                 <Upload size={40} color="#2E7D32" />
                 <p>Drag & Drop or Click to Upload</p>
                 <p>Supported formats: PDF, DOCX, PPTX</p>
-              <input
-                type="file"
-                onChange={(e) => {
-                  console.log('File selected:', e.target.files[0]); // Debug
-                  setFile(e.target.files[0]);
-                  setError('');
-                  setSuccess('');
-                }}
-                className="file-input"
-                disabled={loading}
-              />
-            </div>
+                <input
+                  type="file"
+                  onChange={(e) => {
+                    console.log('File selected:', e.target.files[0]); // Debug
+                    setFile(e.target.files[0]);
+                    setError('');
+                    setSuccess('');
+                  }}
+                  className="file-input"
+                  disabled={loading}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    opacity: 0,
+                    cursor: "pointer",
+                    zIndex: 1
+                  }}
+                />
+              </div>
             </div>
             <div className="modal-footer">
               <button
@@ -481,6 +544,7 @@ function LibraryMaterials({ authToken }) {
                   console.log('Cancel upload'); // Debug
                   setUploadModalOpen(false);
                   setFile(null);
+                  setSelectedCategory(null);
                   setError('');
                   setSuccess('');
                 }}
