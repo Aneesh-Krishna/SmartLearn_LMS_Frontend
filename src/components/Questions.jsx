@@ -5,7 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import Spinner from './Loading';
 import '../styles/Questions.css'; // Import custom CSS file
 
-function Questions({ authToken, adminId, quizTitle, questionId, setQuestionId, questionText, setQuestionText }) {
+function Questions({ authToken, adminId, admin, quizTitle, questionId, setQuestionId, questionText, setQuestionText }) {
     const { quizId } = useParams();
     const [loading, setLoading] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);

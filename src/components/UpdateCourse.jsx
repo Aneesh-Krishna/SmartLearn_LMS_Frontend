@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import '../styles/CreateCourse.css'; // Import the CSS file
 
-function UpdateCourse({ authToken, courseId, courseName, setCourseName, description, setDescription, setLoading }) {
+function UpdateCourse({ authToken, courseId, courseName, setCourseName, description, setDescription, setLoading, adminId, admin }) {
 
     document.title = 'Update-Course: SmartLearn_LMS'
 

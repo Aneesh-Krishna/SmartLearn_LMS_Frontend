@@ -5,7 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import { deleteAssignment, downloadAssignmentFile, fetchAllAssignments, uploadAssignment } from "../services/AssignmentService";
 import "../styles/Assignments.css";
 
-function Assignments({ authToken, courseId, courseName, adminId, setAssignmentId, setAssignmentText }) {
+function Assignments({ authToken, courseId, courseName, adminId, admin, setAssignmentId, setAssignmentText }) {
     document.title = 'Assignments: SmartLearn_LMS'
 
     const [formData, setFormData] = useState({

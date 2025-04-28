@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import '../styles/CourseChats.css';
 import { HubConnectionBuilder } from "@microsoft/signalr";
 
-function CourseChats({ authToken, adminId, courseId, courseName }) {
+function CourseChats({ authToken, adminId, admin, courseId, courseName }) {
     const [chats, setChats] = useState(null);
     const [error, setError] = useState(null);
     const [file, setFile] = useState(null);
@@ -30,9 +30,9 @@ function CourseChats({ authToken, adminId, courseId, courseName }) {
         const selectedFile = e.target.files[0];
         setFile(selectedFile);
     };
-    
 
-    
+
+
     const fetchAllChats = async () => {
         try {
             const response = await fetch(`http://localhost:5116/api/chat/${courseId}/GetAllChats`, {
@@ -161,23 +161,23 @@ function CourseChats({ authToken, adminId, courseId, courseName }) {
     useEffect(() => {
         // After the component mounts and layout stabilizes, show the button smoothly
         const timeout = setTimeout(() => {
-          setIsVisible(true); // Make button visible after 1 second
+            setIsVisible(true); // Make button visible after 1 second
         }, 500); // Wait for 1 second
-    
+
         // Cleanup the timeout if the component unmounts
         return () => clearTimeout(timeout);
-      }, []);
+    }, []);
     return (
         <div className="chat-container">
             <NavLink to="/courses" className={`btn-outline-primary ${isVisible ? "show" : "hidden"}`}>
                 ◄ Back to Courses
             </NavLink>
-            
+
             <div className="chat-card">
                 <div className="chat-header">
                     <h2 className="chat-title">{courseName}</h2>
                 </div>
-                
+
                 <div className="chat-body" ref={chatBodyRef}>
                     {error ? (
                         <div className="error">Failed to load chats: {error}</div>
@@ -197,7 +197,7 @@ function CourseChats({ authToken, adminId, courseId, courseName }) {
                                         {chat.fileName && (
                                             <div className="chatFile">
                                                 <span className="file-label">File:</span>
-                                                <button 
+                                                <button
                                                     onClick={() => handleDownloadFile(chat.fileName)}
                                                     className="download-button"
                                                 >
