@@ -26,7 +26,7 @@ function RecommendedMaterials({ authToken }) {
 
             if (response.ok) {
                 const data = await response.json();
-                debugger
+
                 setRecommendationType(data?.recommendationType);
                 setRecommendations(data?.recommendations?.$values || []);
             } else {

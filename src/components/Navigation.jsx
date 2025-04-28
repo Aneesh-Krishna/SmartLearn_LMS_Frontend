@@ -21,7 +21,7 @@ const Navigation = ({ authToken, setAuthToken, onSort, userName, userEmail, setI
           Authorization: `Bearer ${authToken}`,
         },
       });
-      debugger;
+
       if (response.ok) {
         return response;
       }
