@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import Spinner from './Loading';
 import { NavLink } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; 
+import '../styles/SubmitAssignment.css';
 
-function SubmitAssignment({ authToken, adminId, admin, assignmentId, assignmentText }) {
-    document.title = 'Submissions: SmartLearn_LMS';
+function SubmitAssignment({ authToken, adminId, assignmentId, assignmentText }) {
+    document.title = 'Submissions: ClassroomApp';
 
     const [submissions, setSubmissions] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -72,42 +73,42 @@ function SubmitAssignment({ authToken, adminId, admin, assignmentId, assignmentT
     };
 
     const handleDownload = async (submissionFileName) => {
-        try {
-            const response = await fetch(`https://localhost:7110/api/file/${submissionFileName}`, {
-                method: "GET",
-                headers: {
+            try {
+                const response = await fetch(`https://localhost:7110/api/file/${submissionFileName}`, {
+                  method: "GET",
+                  headers: {
                     Authorization: `Bearer ${authToken}`,
-                },
-            });
-
-            if (response.ok) {
-                // Parse the response as a blob
-                console.log("Response okay..")
-                const blob = await response.blob();
-
-                // Create a temporary link element to initiate the download
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = fileName; // Suggest the filename for the downloaded file
-                document.body.appendChild(link);
-                link.click();
-
-                // Clean up after download
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-
-                console.log("File downloaded successfully.");
-            }
-
-            else {
-                console.error("An error occured while downloading...", response.statusText)
-            }
-
-        } catch (error) {
-            console.error("Something went wrong...:", error);
-        }
-    };
+                  },
+                });
+            
+                if (response.ok) {
+                  // Parse the response as a blob
+                  console.log("Response okay..")
+                  const blob = await response.blob();
+            
+                  // Create a temporary link element to initiate the download
+                  const url = window.URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = fileName; // Suggest the filename for the downloaded file
+                  document.body.appendChild(link);
+                  link.click();
+            
+                  // Clean up after download
+                  document.body.removeChild(link);
+                  window.URL.revokeObjectURL(url);
+            
+                  console.log("File downloaded successfully.");
+                }
+            
+                else{
+                  console.error("An error occured while downloading...",response.statusText)
+                }
+                
+              } catch (error) {
+                console.error("Something went wrong...:", error);
+              }
+        };
 
     useEffect(() => {
         fetchAllSubmissions();
@@ -153,17 +154,17 @@ function SubmitAssignment({ authToken, adminId, admin, assignmentId, assignmentT
                             ></button>
                         </div>
                         <div className="modal-body">
-                            <input
-                                type="text"
+                            <input 
+                                type="text" 
                                 className="form-control mb-3"
-                                onChange={(e) => setSubmissionText(e.target.value)}
-                                value={submissionText}
+                                onChange={(e) => setSubmissionText(e.target.value)} 
+                                value={submissionText} 
                                 placeholder="Enter submission text here"
                             />
-                            <input
-                                type="file"
-                                className="form-control"
-                                onChange={(e) => setFile(e.target.files[0])}
+                            <input 
+                                type="file" 
+                                className="form-control" 
+                                onChange={(e) => setFile(e.target.files[0])} 
                             />
                         </div>
                         <div className="modal-footer">
@@ -174,11 +175,11 @@ function SubmitAssignment({ authToken, adminId, admin, assignmentId, assignmentT
                             >
                                 Cancel
                             </button>
-                            <button
-                                type="button"
-                                disabled={!isAdmin}
-                                onClick={handleUploadSubmission}
-                                className="btn btn-primary"
+                            <button 
+                                type="button" 
+                                disabled={!isAdmin} 
+                                onClick={handleUploadSubmission} 
+                                className="btn btn-primary" 
                                 data-bs-dismiss="modal"
                             >
                                 Upload

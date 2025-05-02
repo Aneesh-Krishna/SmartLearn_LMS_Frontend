@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Courses.css';
 
 function Courses({ authToken, setCourseId, setCourseName, setAdmin, setAdminId, setDescription, setAuthToken, sortBy }) {
-    document.title = 'Courses: SmartLearn_LMS';
+    document.title = 'Courses: Assignment-App';
     const [courses, setCourses] = useState([]);
+    const [filteredCourses, setFilteredCourses] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
@@ -30,6 +32,7 @@ function Courses({ authToken, setCourseId, setCourseName, setAdmin, setAdminId, 
                 }
 
                 setCourses(fetchedCourses);
+                setFilteredCourses(fetchedCourses);
             } else {
                 console.error('Failed to fetch courses:', response.statusText);
             }
@@ -42,23 +45,47 @@ function Courses({ authToken, setCourseId, setCourseName, setAdmin, setAdminId, 
 
     useEffect(() => {
         fetchCourses();
-    }, [authToken, sortBy]); // Refetch when sorting changes
+    }, [authToken, sortBy]);
+
+    // Handle search functionality
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setFilteredCourses(courses);
+        } else {
+            const filtered = courses.filter(course =>
+                course.courseName.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            setFilteredCourses(filtered);
+        }
+    }, [searchQuery, courses]);
 
     return (
         <div className="courses-container" style={{ marginTop: 50 }}>
-            <h3 className="text-center">Your Courses</h3>
-            <NavLink to="/createCourse"
-                className="create-course-link"
-                onClick={() => setAuthToken(authToken)}
-            >
-                Create new course
-            </NavLink>
+            <div className="courses-header">
+                <h3 className="text-center">Your Courses</h3>
+                <div className="header-actions">
+                    <input
+                        type="text"
+                        className="search-bar"
+                        placeholder="Search courses..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <NavLink
+                        to="/createCourse"
+                        className="create-course-link"
+                        onClick={() => setAuthToken(authToken)}
+                    >
+                        Create new course
+                    </NavLink>
+                </div>
+            </div>
 
             {loading ? <Spinner /> : null}
 
-            {courses.length <= 0 ? <p><b>You've not enrolled in any courses!</b></p> : null}
+            {filteredCourses.length <= 0 ? <p><b>You've not enrolled in any courses!</b></p> : null}
             <div className="courses-grid">
-                {courses.map((course) => (
+                {filteredCourses.map((course) => (
                     <div className="course-card" key={course.courseId}>
                         <div className="course-card-header">
                             <h4>{course.courseName}</h4>

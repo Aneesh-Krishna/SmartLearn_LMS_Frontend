@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate, } from 'react-router-dom';
 import './App.css'
 import './styles/Navigation.css'
@@ -15,19 +15,15 @@ import MaterialsPage from './components/MaterialsPage';
 import SubmitAssignment from './components/SubmitAssignment';
 import CourseChats from './components/CourseChats';
 import LibraryMaterials from './components/LibraryMaterials';
-import DocumentAnalysisBot from './components/DocumentAnalysisBot.jsx';
-import Meeting from './components/Meeting.jsx';
-import SettingsPage from './components/SettingsPage.jsx';
-import { jwtDecode } from 'jwt-decode';
-import Quiz from './components/Quiz.jsx';
-import QuizRoom from './components/QuizRoom.jsx';
-import Questions from './components/Questions.jsx';
-import Options from './components/Options.jsx';
+import Meeting from './components/Meeting';
+import MeetingRoomPage from './components/MeetingRoomPage';
+import Quiz from './components/Quiz';
+import Questions from './components/Questions';
+import Options from './components/Options';
+import QuizRoom from './components/QuizRoom';
 
 function App() {
-  const [authToken, setAuthToken] = useState(() => {
-    return localStorage.getItem('authToken') || null;
-  })
+  const [authToken, setAuthToken] = useState(null)
   const [showRegister, setShowRegister] = useState(true)
   const [courseId, setCourseId] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -38,58 +34,9 @@ function App() {
   const [assignmentId, setAssignmentId] = useState(null)
   const [assignmentText, setAssignmentText] = useState('')
   const [sortBy, setSortBy] = useState(null);
-  const [userName, setUserName] = useState(null);
-  const [userEmail, setUserEmail] = useState(null);
-  const [isLogout, setIsLogout] = useState(false);
-  const [quizTitle, setQuizTitle] = useState('');
-  const [quizId, setQuizId] = useState(null);
-  const [quesitonId, setQuestionId] = useState(null);
-  const [questionText, setQuestionText] = useState('');
-
   const handleSort = (criteria) => {
     setSortBy(criteria);
   };
-
-  var paramUserName;
-  var paramUserEmail;
-
-  document.title = "SmartLearn_LMS";
-
-  const getUserName = async () => {
-    try {
-      const userId = jwtDecode(authToken).sub;
-      const response = await fetch(`http://localhost:5116/api/account/${userId}/details`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-
-        setUserName(data?.$values[0]?.userName);
-        setUserEmail(data?.$values[0]?.email);
-
-        paramUserName = data?.$values[0]?.userName;
-        paramUserEmail = data?.$values[0]?.email;
-
-        console.log(paramUserName);
-        console.log(paramUserEmail);
-
-      }
-      else {
-        setUserName(null);
-        setUserEmail(null);
-      }
-    }
-    catch (error) {
-      console.error("Something went wrong while fetching the user's details...", error);
-    }
-  }
-
-  useEffect(() => {
-    getUserName();
-  }, [authToken]);
 
   if (!authToken) {
     return (
@@ -105,7 +52,7 @@ function App() {
 
   return (
     <>
-      <Navigation authToken={authToken} setAuthToken={setAuthToken} onSort={handleSort} userName={userName} userEmail={userEmail} setIsLogout={setIsLogout} />
+      <Navigation setAuthToken={setAuthToken} onSort={handleSort}/>
       <main className="app-main">
         <Routes>
           {/* Default route to courses */}
@@ -113,7 +60,7 @@ function App() {
             path="/"
             element={<Navigate to="/home" replace />}
 
-
+           
           />
 
           {/* Routes for the app */}
@@ -122,27 +69,27 @@ function App() {
             element={
               <Courses
                 authToken={authToken}
-                setAuthToken={setAuthToken}
                 setCourseId={setCourseId}
                 setCourseName={setCourseName}
                 setAdmin={setAdmin}
                 setAdminId={setAdminId}
                 setDescription={setDescription}
+                setAuthToken={setAuthToken}
                 sortBy={sortBy}
               />
             }
           />
-          <Route
+           <Route
             path="/courses"
             element={
               <Courses
                 authToken={authToken}
-                setAuthToken={setAuthToken}
                 setCourseId={setCourseId}
                 setCourseName={setCourseName}
                 setAdmin={setAdmin}
                 setAdminId={setAdminId}
                 setDescription={setDescription}
+                setAuthToken={setAuthToken}
                 sortBy={sortBy}
               />
             }
@@ -167,10 +114,7 @@ function App() {
           <Route
             path="/createCourse"
             element={
-              <CreateCourse
-                authToken={authToken}
-                setLoading={setLoading}
-              />
+              <CreateCourse authToken={authToken} setLoading={setLoading} />
             }
           />
           <Route
@@ -181,7 +125,6 @@ function App() {
                 courseId={courseId}
                 courseName={courseName}
                 adminId={adminId}
-                admin={admin}
                 setCourseName={setCourseName}
                 description={description}
                 setDescription={setDescription}
@@ -217,7 +160,6 @@ function App() {
                 courseId={courseId}
                 courseName={courseName}
                 adminId={adminId}
-                admin={admin}
                 setAssignmentId={setAssignmentId}
                 setAssignmentText={setAssignmentText}
               />
@@ -229,7 +171,6 @@ function App() {
               <SubmitAssignment
                 authToken={authToken}
                 adminId={adminId}
-                admin={admin}
                 assignmentId={assignmentId}
                 assignmentText={assignmentText}
               />
@@ -241,97 +182,56 @@ function App() {
               <CourseChats
                 authToken={authToken}
                 adminId={adminId}
-                admin={admin}
                 courseId={courseId}
                 courseName={courseName}
               />
             }
           />
-          <Route
+          {/* <Route
+          path="/meetings"
+          element={
+            <Meeting authToken={authToken} adminId={adminId} courseId={courseId} courseName={courseName} setMeetingId={setMeetingId} meetingName={meetingName} setMeetingName={setMeetingName} />
+          }
+        />
+        <Route
+          path="/meetingRoomPage/:meetingId"
+          element={
+            <MeetingRoomPage />
+          }
+        />
+        <Route
+          path="/quiz"
+          element={
+            <Quiz authToken={authToken} adminId={adminId} courseId={courseId} courseName={courseName} setQuizId={setQuizId} quizTitle={quizTitle} setQuizTitle={setQuizTitle} />
+          }
+        />
+        <Route
+          path="/questions/:quizId"
+          element={
+            <Questions authToken={authToken} adminId={adminId} quizTitle={quizTitle} quesitonId={quesitonId} setQuestionId={setQuestionId} questionText={questionText} setQuestionText={setQuestionText} />
+          }
+        />
+        <Route
+          path="/options/:questionId"
+          element={
+            <Options authToken={authToken} adminId={adminId} quizId={quizId} questionText={questionText} />
+          }
+        />
+        <Route
+          path="/quizRoom/:quizId/:duration"
+          element={
+            <QuizRoom authToken={authToken} quizTitle={quizTitle} />
+          }
+        /> */}
+                    <Route
             path="/library"
             element={
-              <LibraryMaterials
+              <LibraryMaterials 
                 authToken={authToken}
               />
             }
           />
-          <Route
-            path="/documentAnalysis"
-            element={
-              <DocumentAnalysisBot />
-            }
-          />
-          <Route
-            path="/meetings"
-            element={
-              <Meeting
-                authToken={authToken}
-                adminId={adminId}
-                courseId={courseId}
-                courseName={courseName}
-              />
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <SettingsPage
-                authToken={authToken}
-              />
-            }
-          />
-          <Route
-            path="/quiz"
-            element={
-              <Quiz
-                authToken={authToken}
-                adminId={adminId}
-                admin={admin}
-                courseId={courseId}
-                courseName={courseName}
-                setQuizId={setQuizId}
-                quizTitle={quizTitle}
-                setQuizTitle={setQuizTitle}
-              />
-            }
-          />
-          <Route
-            path="/questions/:quizId"
-            element={
-              <Questions
-                authToken={authToken}
-                adminId={adminId}
-                admin={admin}
-                quizTitle={quizTitle}
-                quesitonId={quesitonId}
-                setQuestionId={setQuestionId}
-                questionText={questionText}
-                setQuestionText={setQuestionText}
-              />
-            }
-          />
-          <Route
-            path="/options/:questionId"
-            element={
-              <Options
-                authToken={authToken}
-                adminId={adminId}
-                admin={admin}
-                quizId={quizId}
-                questionText={questionText}
-              />
-            }
-          />
-          <Route
-            path="/quizRoom/:quizId/:duration"
-            element={
-              <QuizRoom
-                authToken={authToken}
-                quizTitle={quizTitle}
-              />
-            }
-          />
-
+          
         </Routes>
       </main>
     </>

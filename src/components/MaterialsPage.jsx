@@ -67,9 +67,9 @@ function MaterialsPage({ courseId, authToken, adminId }) {
     }
   };
 
-  const handleDownload = async (materialName) => {
+  const handleDownload = async (materialUrl) => {
     try {
-      const response = await fetch(`http://localhost:5116/api/file/${materialName}`, {
+      const response = await fetch(materialUrl, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
@@ -112,21 +112,19 @@ function MaterialsPage({ courseId, authToken, adminId }) {
     <div className="materials-container">
       <div className="materials-header">
         <h1>
-          <NavLink to="/courseDetails" className="btn-outline-primary">
-            ◄ Back
+          <NavLink to="/courseDetails" className="back-button">
+            <span className="back-icon">◄</span> Back
           </NavLink>
           Course Materials
         </h1>
         {isAdmin && (
-          <div className="material-upload">
-            <button
-              className="upload-button"
-              data-bs-toggle="modal"
-              data-bs-target="#uploadMaterialModal"
-            >
-              Upload Material
-            </button>
-          </div>
+          <button
+            className="upload-button"
+            data-bs-toggle="modal"
+            data-bs-target="#uploadMaterialModal"
+          >
+            Upload Material
+          </button>
         )}
       </div>
 
@@ -152,7 +150,7 @@ function MaterialsPage({ courseId, authToken, adminId }) {
               <div className="material-actions">
                 <button
                   className="action-button download-button"
-                  onClick={() => handleDownload(material.materialName)}
+                  onClick={() => handleDownload(material.materialUrl)}
                 >
                   Download
                 </button>
@@ -182,22 +180,30 @@ function MaterialsPage({ courseId, authToken, adminId }) {
       {/* Upload Material Modal */}
       <div className="modal fade" id="uploadMaterialModal" tabIndex="-1" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
+          <div className="modal-content upload-modal-content">
             <div className="modal-header">
               <h5 className="modal-title">Upload Material</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-              <input
-                type="file"
-                className="form-control"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
+              <div className="upload-area">
+                <input
+                  type="file"
+                  className="form-control upload-input"
+                  onChange={(e) => setFile(e.target.files[0])}
+                  id="fileUpload"
+                />
+                <label htmlFor="fileUpload" className="upload-label">
+                  <span className="upload-icon">📤</span>
+                  <p className="upload-text">Drag & Drop or Click to Upload</p>
+                  <p className="upload-hint">Supported formats: PDF, DOCX, PPTX</p>
+                </label>
+              </div>
             </div>
             <div className="modal-footer">
-              <button className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button className="btn btn-secondary cancel-btn" data-bs-dismiss="modal">Cancel</button>
               <button
-                className="btn btn-primary"
+                className="btn btn-primary upload-submit"
                 onClick={handleFileUpload}
                 data-bs-dismiss="modal"
               >
