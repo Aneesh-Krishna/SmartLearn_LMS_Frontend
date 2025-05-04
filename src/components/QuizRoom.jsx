@@ -13,10 +13,22 @@ function QuizRoom({ authToken, quizTitle }) {
     const [selectedAnswers, setSelectedAnswers] = useState({});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [answeredQuestions, setAnsweredQuestions] = useState(new Set());
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
     const handleAnswerChange = useCallback((questionId, optionId) => {
-        setSelectedAnswers(prev => ({ ...prev, [questionId]: optionId }));
-    }, []);
+        setSelectedAnswers(prev => {
+            const newAnswers = { ...prev, [questionId]: optionId };
+            // Update answered questions set
+            const newAnswered = new Set(answeredQuestions);
+            newAnswered.add(questionId);
+            setAnsweredQuestions(newAnswered);
+            // Update progress
+            setProgress(Math.round((newAnswered.size / questionsWithOptions.length) * 100));
+            return newAnswers;
+        });
+    }, [answeredQuestions, questionsWithOptions.length]);
 
     const fetchQuestionsWithOptions = useCallback(async () => {
         try {
@@ -65,7 +77,7 @@ function QuizRoom({ authToken, quizTitle }) {
             console.error("An error occurred while submitting the answers:", error);
         } finally {
             setIsSubmitting(false);
-            navigate('/quiz');
+            navigate('/courseDetails');
         }
     }, [quizId, authToken, selectedAnswers, navigate]);
 
@@ -85,52 +97,150 @@ function QuizRoom({ authToken, quizTitle }) {
         }
     }, [currentQuestionIndex]);
 
+    const jumpToQuestion = (index) => {
+        setCurrentQuestionIndex(index);
+    };
+
+    const toggleConfirmation = () => {
+        setShowConfirmation(!showConfirmation);
+    };
+
     return (
         <div className="quiz-room-container">
-            <NavLink to="/quiz" className="back-link">◄ Back</NavLink>
-            <h3 className="quiz-title">{quizTitle}</h3>
+            <div className="quiz-header">
+                <NavLink to="/quiz" className="back-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 18L9 12L15 6" stroke="#4A5568" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Back to Quizzes
+                </NavLink>
+                <div className="quiz-title-container">
+                    <h2 className="quiz-title">{quizTitle}</h2>
+                    <div className="quiz-meta">
+                        <span className="question-counter">
+                            Question {currentQuestionIndex + 1} of {questionsWithOptions.length}
+                        </span>
+                        <CountdownTimer initialMinutes={duration} onTimeUp={handleSubmit} />
+                    </div>
+                </div>
+            </div>
+
             {loading ? (
                 <div className="loading-container">
                     <Spinner />
                 </div>
             ) : (
                 <div className="quiz-content">
-                    <CountdownTimer initialMinutes={duration} />
-                    <div className="question-navigation">
-                        <button onClick={goToPreviousQuestion} disabled={currentQuestionIndex === 0}>Previous</button>
-                        <span>{currentQuestionIndex + 1} / {questionsWithOptions.length}</span>
-                        <button onClick={goToNextQuestion} disabled={currentQuestionIndex === questionsWithOptions.length - 1}>Next</button>
-                    </div>
-                    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="quiz-form">
-                        {questionsWithOptions.length > 0 ? (
-                            <div className="question-container">
-                                <h4 className="question-text">{questionsWithOptions[currentQuestionIndex].text}</h4>
-                                <p className="question-meta">
-                                    Difficulty: {questionsWithOptions[currentQuestionIndex].difficulty} | 
-                                    Points: {questionsWithOptions[currentQuestionIndex].points}
-                                </p>
-                                {questionsWithOptions[currentQuestionIndex].options?.$values?.map((option) => (
-                                    <div key={option.optionId} className="option-container">
-                                        <label className="option-label">
-                                            <input
-                                                type="radio"
-                                                name={`question-${questionsWithOptions[currentQuestionIndex].questionId}`}
-                                                value={option.optionId}
-                                                checked={selectedAnswers[questionsWithOptions[currentQuestionIndex].questionId] === option.optionId}
-                                                onChange={() => handleAnswerChange(questionsWithOptions[currentQuestionIndex].questionId, option.optionId)}
-                                            />
-                                            <span className="option-text">{option.text}</span>
-                                        </label>
-                                    </div>
+                    {questionsWithOptions.length > 0 ? (
+                        <>
+                            <div className="progress-container">
+                                <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+                                <span className="progress-text">{progress}% Complete</span>
+                            </div>
+
+                            <div className="question-navigation">
+                                {questionsWithOptions.map((_, index) => (
+                                    <button
+                                        key={index}
+                                        className={`question-nav-btn ${currentQuestionIndex === index ? 'active' : ''} ${answeredQuestions.has(questionsWithOptions[index].questionId) ? 'answered' : ''}`}
+                                        onClick={() => jumpToQuestion(index)}
+                                    >
+                                        {index + 1}
+                                    </button>
                                 ))}
                             </div>
-                        ) : (
-                            <p className="no-questions-message">There are no questions, please contact your instructor</p>
-                        )}
-                        <button type="submit" className="submit-btn" disabled={isSubmitting}>
-                            {isSubmitting ? 'Submitting...' : 'Submit'}
+
+                            <div className="question-card">
+                                <div className="question-header">
+                                    <div className="difficulty-badge" data-difficulty={questionsWithOptions[currentQuestionIndex].difficulty}>
+                                        {questionsWithOptions[currentQuestionIndex].difficulty}
+                                    </div>
+                                    <div className="points-badge">
+                                        {questionsWithOptions[currentQuestionIndex].points} pts
+                                    </div>
+                                </div>
+                                <h3 className="question-text">{questionsWithOptions[currentQuestionIndex].text}</h3>
+
+                                <div className="options-container">
+                                    {questionsWithOptions[currentQuestionIndex].options?.$values?.map((option) => (
+                                        <div
+                                            key={option.optionId}
+                                            className={`option-item ${selectedAnswers[questionsWithOptions[currentQuestionIndex].questionId] === option.optionId ? 'selected' : ''}`}
+                                            onClick={() => handleAnswerChange(questionsWithOptions[currentQuestionIndex].questionId, option.optionId)}
+                                        >
+                                            <div className="option-radio">
+                                                <div className="radio-circle"></div>
+                                            </div>
+                                            <div className="option-text">{option.text}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="no-questions-card">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M12 8V12" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M12 16H12.01" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <h3>No Questions Available</h3>
+                            <p>There are no questions in this quiz. Please contact your instructor.</p>
+                        </div>
+                    )}
+
+                    <div className="quiz-footer">
+                        <div className="navigation-buttons">
+                            <button
+                                onClick={goToPreviousQuestion}
+                                disabled={currentQuestionIndex === 0}
+                                className="nav-button prev-button"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                                Previous
+                            </button>
+                            <button
+                                onClick={goToNextQuestion}
+                                disabled={currentQuestionIndex === questionsWithOptions.length - 1}
+                                className="nav-button next-button"
+                            >
+                                Next
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={toggleConfirmation}
+                            disabled={isSubmitting}
+                            className="submit-button"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 22V18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                    </svg>
+                                    Submitting...
+                                </>
+                            ) : 'Submit Quiz'}
                         </button>
-                    </form>
+                    </div>
+                </div>
+            )}
+
+            {showConfirmation && (
+                <div className="confirmation-modal">
+                    <div className="confirmation-content">
+                        <h3>Submit Quiz?</h3>
+                        <p>Are you sure you want to submit your answers? You won't be able to make changes after submission.</p>
+                        <div className="confirmation-buttons">
+                            <button onClick={toggleConfirmation} className="cancel-button">Cancel</button>
+                            <button onClick={handleSubmit} className="confirm-button">Submit</button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
@@ -138,4 +248,3 @@ function QuizRoom({ authToken, quizTitle }) {
 }
 
 export default QuizRoom;
-

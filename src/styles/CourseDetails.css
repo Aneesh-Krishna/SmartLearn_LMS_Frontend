@@ -36,13 +36,14 @@ body {
 .gc-course-details-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 76px 16px 16px 16px;
 }
 
 /* Course Banner */
 .gc-course-banner {
   height: 240px;
-  background-color: var(--gc-banner-color);
+  background-image: linear-gradient(to right, #2196f3, #00c6ff);
+  background-color: rgba(53, 175, 184, 0.778);
   border-radius: 8px;
   box-shadow: var(--gc-shadow);
   margin-bottom: 24px;

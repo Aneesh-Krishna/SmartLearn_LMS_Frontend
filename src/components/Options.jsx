@@ -5,11 +5,12 @@ import { jwtDecode } from 'jwt-decode';
 import '../styles/Options.css'; // Import custom CSS
 
 function Options({ authToken, adminId, admin, quizId, questionText }) {
+    const { questionId, hasEnded } = useParams();
+
     const [isAdmin, setIsAdmin] = useState(false);
     const [options, setOptions] = useState([]);
     const [optionText, setOptionText] = useState('');
     const [optionsIsCorrect, setOptionIsCorrect] = useState(false);
-    const { questionId } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [deleteOptionId, setDeleteOptionId] = useState(null);
@@ -128,6 +129,7 @@ function Options({ authToken, adminId, admin, quizId, questionText }) {
                                     <span className="option-correct">Correct: {option.isCorrect ? "Yes" : "No"}</span>
                                     <button
                                         className="btn btn-outline-danger btn-sm delete-btn"
+                                        disabled={!hasEnded}
                                         data-bs-toggle="modal"
                                         data-bs-target="#deleteOptionModal"
                                         onClick={() => {

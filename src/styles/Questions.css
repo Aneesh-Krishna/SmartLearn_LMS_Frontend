@@ -1,72 +1,216 @@
-.questions-container {
+.classroom-container {
+    max-width: 800px;
+    margin: 0 auto;
     padding: 20px;
+}
+
+.questions-container {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 76px 16px 16px 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .back-link {
     display: inline-block;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    color: #0d6efd;
     text-decoration: none;
-    color: #007bff;
+    font-size: 16px;
+}
+
+.back-link:hover {
+    text-decoration: underline;
 }
 
 .quiz-title {
-    font-size: 24px;
+    color: #333;
     margin-bottom: 20px;
 }
 
 .new-question-btn {
+    background-color: #0d6efd;
+    color: white;
     margin-bottom: 20px;
+}
+
+.new-question-btn:hover {
+    background-color: #0b5ed7;
+}
+
+.new-question-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.questions-list {
+    list-style: none;
+    padding: 0;
+}
+
+.question-item {
+    background-color: white;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.question-item:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.question-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.question-text {
+    font-weight: 500;
+    margin: 0;
+    flex: 1 1 100%;
+}
+
+.question-details {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 0;
+}
+
+.question-status {
+    font-size: 14px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.options-container {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.options-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background-color: white;
+    border-radius: 4px;
+    border-left: 4px solid #dc3545;
+}
+
+.option-item.correct-option {
+    border-left-color: #198754;
+}
+
+.option-text {
+    flex: 1;
+}
+
+.option-correct {
+    font-size: 13px;
+    color: #6c757d;
+    margin: 0 10px;
+}
+
+.correct-option .option-correct {
+    color: #198754;
+    font-weight: 500;
+}
+
+.no-options {
+    color: #6c757d;
+    font-style: italic;
+    padding: 8px 12px;
+}
+
+.add-option-btn {
+    background-color: #0d6efd;
+    color: white;
+    margin-right: 10px;
+}
+
+.add-option-btn:hover {
+    background-color: #0b5ed7;
+}
+
+.add-option-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.options-count {
+    display: inline-block;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.delete-btn {
+    margin-left: auto;
+}
+
+.delete-option-btn {
+    margin-left: 10px;
+}
+
+.no-content {
+    color: #6c757d;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
 }
 
 .loading-container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 200px;
+    padding: 40px;
 }
 
-.questions-list {
-    list-style-type: none;
-    padding: 0;
+/* Modal styles */
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
 }
 
-.question-item {
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 5px;
+.modal-footer {
+    border-top: 1px solid #dee2e6;
 }
 
-.question-text {
-    font-size: 18px;
-    font-weight: bold;
+.form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
 }
 
-.question-details {
-    font-size: 14px;
-    color: #666;
-}
-
-.buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.to-options-btn {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-.delete-btn {
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    cursor: pointer;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .question-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .question-status, .delete-btn {
+        margin-top: 8px;
+        align-self: flex-end;
+    }
+    
+    .option-item {
+        flex-wrap: wrap;
+    }
+    
+    .option-text {
+        flex: 1 1 100%;
+        margin-bottom: 5px;
+    }
 }
