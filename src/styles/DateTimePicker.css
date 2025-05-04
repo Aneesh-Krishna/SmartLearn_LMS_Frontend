@@ -1,0 +1,197 @@
+.gc-datetime-picker {
+    position: relative;
+    font-family: 'Roboto', sans-serif;
+}
+
+.gc-datetime-display {
+    display: flex;
+    gap: 10px;
+}
+
+.gc-date-button, .gc-time-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background-color: white;
+    border: 1px solid var(--gc-border);
+    border-radius: 4px;
+    font-size: 14px;
+    color: var(--gc-text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gc-date-button:hover, .gc-time-button:hover {
+    background-color: var(--gc-primary-light);
+    border-color: var(--gc-primary);
+}
+
+.gc-date-button .material-icons, .gc-time-button .material-icons {
+    font-size: 18px;
+    color: var(--gc-secondary);
+}
+
+.gc-date-picker, .gc-time-picker {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 280px;
+    background-color: white;
+    border: 1px solid var(--gc-border);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    z-index: 1000;
+    margin-top: 5px;
+}
+
+.gc-date-picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.gc-nav-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gc-nav-button:hover {
+    background-color: var(--gc-primary-light);
+}
+
+.gc-month-year {
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.gc-days-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 8px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--gc-text-secondary);
+}
+
+.gc-day-header {
+    padding: 5px;
+}
+
+.gc-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.gc-day-button {
+    border: none;
+    background: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.gc-day-button:hover:not(.other-month) {
+    background-color: var(--gc-primary-light);
+}
+
+.gc-day-button.selected {
+    background-color: var(--gc-primary);
+    color: white;
+}
+
+.gc-day-button.other-month {
+    color: var(--gc-text-secondary);
+    cursor: default;
+}
+
+.gc-time-picker {
+    width: 240px;
+}
+
+.gc-time-sliders {
+    margin-bottom: 12px;
+}
+
+.gc-time-slider {
+    margin-bottom: 12px;
+}
+
+.gc-time-slider label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: var(--gc-text-secondary);
+}
+
+.gc-time-slider input[type="range"] {
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.gc-time-slider span {
+    display: block;
+    text-align: center;
+    font-size: 14px;
+}
+
+.gc-ampm-toggle {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.gc-ampm-toggle button {
+    padding: 5px 15px;
+    border: 1px solid var(--gc-border);
+    background: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.gc-ampm-toggle button.active {
+    background-color: var(--gc-primary);
+    color: white;
+    border-color: var(--gc-primary);
+}
+
+.gc-day-button.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    background-color: transparent;
+}
+
+.gc-day-button.disabled:hover {
+    background-color: transparent;
+}
+
+.gc-time-info {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--gc-text-secondary);
+    text-align: center;
+    padding: 5px;
+    background-color: var(--gc-primary-light);
+    border-radius: 4px;
+}
+
+.gc-nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.gc-nav-button:disabled:hover {
+    background-color: transparent;
+}

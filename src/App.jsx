@@ -296,7 +296,7 @@ function App() {
             }
           />
           <Route
-            path="/questions/:quizId"
+            path="/questions/:quizId/:hasEnded"
             element={
               <Questions
                 authToken={authToken}
@@ -311,7 +311,7 @@ function App() {
             }
           />
           <Route
-            path="/options/:questionId"
+            path="/options/:questionId/:hasEnded"
             element={
               <Options
                 authToken={authToken}

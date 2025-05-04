@@ -21,7 +21,6 @@ function LibraryMaterials({ authToken }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [filterStatus, setFilterStatus] = useState('accepted');
-  // const [uploaderIdFilter, setUploaderIdFilter] = useState('');
   const [file, setFile] = useState(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -109,7 +108,6 @@ function LibraryMaterials({ authToken }) {
       if (response.ok) {
         const data = await response.json();
         setMaterials(data.$values || []);
-
       }
       else {
         console.log("An error occured while fetching the materials...", response.text);
@@ -139,7 +137,6 @@ function LibraryMaterials({ authToken }) {
       if (response.ok) {
         const data = await response.json();
         setMaterials(data.$values || []);
-
       }
       else {
         console.log("An error occured while fetching upload pending materials...", response.text);
@@ -178,12 +175,10 @@ function LibraryMaterials({ authToken }) {
 
       if (response.ok) {
         const newMaterial = await response.json();
-        // setMaterials((prev) => [...prev, newMaterial]);
         fetchMaterials();
         setSuccess('Material uploaded successfully!');
         setFile(null);
         setUploadModalOpen(false);
-
       }
       else {
         console.log("An error occured while uploading the material...", response.text);
@@ -239,7 +234,6 @@ function LibraryMaterials({ authToken }) {
       if (response.ok) {
         setSuccess('Material rejected!');
         fetchUploadPendingMaterials();
-        // setMaterials((prev) => prev.filter((m) => m.libraryMaterialUploadId !== materialId));
       }
       else {
         console.log("An error occured while rejecting the material...", response.text);
@@ -307,12 +301,12 @@ function LibraryMaterials({ authToken }) {
   };
 
   return (
-    <div className="library-materials-container">
-      <div className="library-header">
+    <div className="gc-library-materials-container">
+      <div className="gc-library-header">
         <h1>Library Materials</h1>
-        <div className="header-actions">
-          <div className="search-bar">
-            <Search size={20} />
+        <div className="gc-header-actions">
+          <div className="gc-search-bar">
+            {/* <Search size={20} className="gc-search-icon" /> */}
             <input
               type="text"
               placeholder="Search materials..."
@@ -321,8 +315,7 @@ function LibraryMaterials({ authToken }) {
             />
           </div>
 
-          <div className="filter-dropdown">
-            <Filter size={20} />
+          <div className="gc-filter-dropdown">
             <select
               value={filterStatus}
               onChange={(e) => {
@@ -334,41 +327,24 @@ function LibraryMaterials({ authToken }) {
                   fetchUploadPendingMaterials();
                 }
               }}
+              className="gc-filter-select"
             >
-              <option value="accepted" onClick={fetchMaterials}>Accepted</option>
-              <option value="pending" onClick={fetchUploadPendingMaterials}>Pending</option>
+              <option value="accepted">Accepted</option>
+              <option value="pending">Pending</option>
             </select>
           </div>
 
-          {/* {isApplicationAdmin && (
-            <div className="uploader-filter">
-              <Filter size={20} />
-              <input
-                type="text"
-                placeholder="Filter by Uploader ID"
-                value={uploaderIdFilter}
-                onChange={(e) => setUploaderIdFilter(e.target.value)}
-              />
-              <button onClick={fetchMaterialsByUploader} disabled={loading}>
-                Apply
-              </button>
-              <button onClick={() => { setUploaderIdFilter(''); fetchMaterials(); }} disabled={loading}>
-                Clear
-              </button>
-            </div>
-          )} */}
-
-          <div className="sort-dropdown">
+          <div className="gc-sort-dropdown">
             <button
-              className="sort-button"
+              className="gc-sort-button"
               onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
             >
-              <SortAsc size={20} />
+              <SortAsc size={18} />
               <span>Sort</span>
               <ChevronDown size={16} />
             </button>
             {isSortDropdownOpen && (
-              <div className="sort-menu">
+              <div className="gc-sort-menu">
                 <button onClick={() => handleSort('name')}>
                   Sort by Name
                 </button>
@@ -380,9 +356,8 @@ function LibraryMaterials({ authToken }) {
           </div>
 
           <button
-            className="upload-button"
+            className="gc-upload-button"
             onClick={() => {
-              console.log('Opening upload modal'); // Debug
               setUploadModalOpen(true);
               setError('');
               setSuccess('');
@@ -390,35 +365,35 @@ function LibraryMaterials({ authToken }) {
             }}
             disabled={loading}
           >
-            <Upload size={20} />
+            <span className="gc-button-icon"><Upload size={18} /></span>
             Upload Material
           </button>
         </div>
       </div>
 
-      {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>}
+      {error && <div className="gc-error-message">{error}</div>}
+      {success && <div className="gc-success-message">{success}</div>}
 
       {!loading && materials?.length > 0 && (
         <RecommendedMaterials authToken={authToken} />
       )}
 
       {loading ? (
-        <div className="loading-animation">
-          <div className="loading-dot"></div>
-          <div className="loading-dot"></div>
-          <div className="loading-dot"></div>
+        <div className="gc-loading-container">
+          <div className="gc-loading-spinner"></div>
         </div>
       ) : materials?.length > 0 ? (
-        <div className="materials-grid">
+        <div className="gc-materials-grid">
           {materials?.map((material, index) => (
-            <div key={material.libraryMaterialUploadId} className="material-card" style={{ animationDelay: `${index * 0.1}s` }}>
-              <div className="material-cover">
-                <FileText size={48} />
-                <h3>{material.libraryMaterialUploadName}</h3>
-                <p>Uploaded by: {material.uploader || 'Unknown'}</p>
+            <div key={material.libraryMaterialUploadId} className="gc-material-card">
+              <div className="gc-material-icon">
+                <FileText size={36} className="gc-file-icon" />
+              </div>
+              <div className="gc-material-content">
+                <h3 className="gc-material-title">{material.libraryMaterialUploadName}</h3>
+                <p className="gc-material-uploader">Uploaded by: {material.uploader || 'Unknown'}</p>
                 <span
-                  className={`status ${material.acceptedOrRejected
+                  className={`gc-status gc-status-${material.acceptedOrRejected
                     ? material.acceptedOrRejected.toLowerCase()
                     : 'pending'
                     }`}
@@ -426,9 +401,9 @@ function LibraryMaterials({ authToken }) {
                   {filterStatus === "accepted" ? 'Accepted' : 'Pending'}
                 </span>
               </div>
-              <div className="material-actions">
+              <div className="gc-material-actions">
                 <button
-                  className="action-button download"
+                  className="gc-action-button gc-download-btn"
                   onClick={() =>
                     handleDownload(
                       material.libraryMaterialUploadId,
@@ -438,25 +413,25 @@ function LibraryMaterials({ authToken }) {
                   }
                   title="Download"
                 >
-                  <Download size={20} />
+                  <Download size={18} />
                 </button>
                 {isApplicationAdmin && material.acceptedOrRejected === '' && (
                   <>
                     <button
-                      className="action-button accept"
+                      className="gc-action-button gc-accept-btn"
                       onClick={() => handleAccept(material.libraryMaterialUploadId)}
                       title="Accept"
                       disabled={loading}
                     >
-                      <Check size={20} />
+                      <Check size={18} />
                     </button>
                     <button
-                      className="action-button reject"
+                      className="gc-action-button gc-reject-btn"
                       onClick={() => handleReject(material.libraryMaterialUploadId)}
                       title="Reject"
                       disabled={loading}
                     >
-                      <X size={20} />
+                      <X size={18} />
                     </button>
                   </>
                 )}
@@ -465,37 +440,35 @@ function LibraryMaterials({ authToken }) {
           ))}
         </div>
       ) : (
-        <div className="no-materials">
-          <FileText size={48} />
+        <div className="gc-no-materials">
+          <FileText size={48} className="gc-empty-icon" />
           <p>No materials found</p>
         </div>
       )}
 
       {uploadModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
+        <div className="gc-modal-overlay">
+          <div className="gc-modal">
+            <div className="gc-modal-header">
               <h2>Upload Material</h2>
               <button
-                className="close-button"
+                className="gc-close-button"
                 onClick={() => {
-                  console.log('Closing upload modal'); // Debug
                   setUploadModalOpen(false);
                   setFile(null);
                   setError('');
                   setSuccess('');
                 }}
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
-            <div className="modal-body">
-              {/* Category dropdown as a separate section */}
-              <div className="category-selection mb-4">
-                <label htmlFor="category-select" className="form-label">Select Category</label>
+            <div className="gc-modal-body">
+              <div className="gc-category-selection">
+                <label htmlFor="category-select" className="gc-form-label">Select Category</label>
                 <select
                   id="category-select"
-                  className="form-select"
+                  className="gc-form-select"
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   value={selectedCategory || ''}
                   disabled={loading}
@@ -509,39 +482,26 @@ function LibraryMaterials({ authToken }) {
                 </select>
               </div>
 
-              {/* Upload area as a separate section with position relative */}
-              <div className="upload-area position-relative">
-                <Upload size={40} color="#2E7D32" />
-                <p>Drag & Drop or Click to Upload</p>
-                <p>Supported formats: PDF, DOCX, PPTX</p>
+              <div className="gc-upload-area">
+                <Upload size={36} color="#1a73e8" />
+                <p className="gc-upload-text">Drag & Drop or Click to Upload</p>
+                <p className="gc-upload-formats">Supported formats: PDF, DOCX, PPTX</p>
                 <input
                   type="file"
                   onChange={(e) => {
-                    console.log('File selected:', e.target.files[0]); // Debug
                     setFile(e.target.files[0]);
                     setError('');
                     setSuccess('');
                   }}
-                  className="file-input"
+                  className="gc-file-input"
                   disabled={loading}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    opacity: 0,
-                    cursor: "pointer",
-                    zIndex: 1
-                  }}
                 />
               </div>
             </div>
-            <div className="modal-footer">
+            <div className="gc-modal-footer">
               <button
-                className="cancel-button"
+                className="gc-cancel-button"
                 onClick={() => {
-                  console.log('Cancel upload'); // Debug
                   setUploadModalOpen(false);
                   setFile(null);
                   setSelectedCategory(null);
@@ -553,11 +513,8 @@ function LibraryMaterials({ authToken }) {
                 Cancel
               </button>
               <button
-                className="upload-button"
-                onClick={() => {
-                  console.log('Attempting upload'); // Debug
-                  handleUpload();
-                }}
+                className="gc-upload-confirm-button"
+                onClick={handleUpload}
                 disabled={!file || loading}
               >
                 {loading ? 'Uploading...' : 'Upload'}

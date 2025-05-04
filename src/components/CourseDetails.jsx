@@ -5,6 +5,11 @@ import { NavLink, useNavigate } from "react-router-dom";
 import Spinner from './Loading';
 import { jwtDecode } from "jwt-decode";
 import { HubConnectionBuilder } from "@microsoft/signalr";
+import MaterialsOverlay from "./MaterialsOverlay"; // Import MaterialsOverlay component
+import Assignments from "./Assignments"; // Import Assignments component
+import MaterialsPage from "./MaterialsPage";
+import Quiz from "./Quiz";
+import UpdateCourse from "./UpdateCourse";
 
 function CourseDetails({ authToken, courseId, courseName, admin, adminId, description }) {
     document.title = 'Course-details: SmartLearn_LMS';
@@ -15,6 +20,13 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
     const [searchUserNameResults, setSearchUsernameResults] = useState([]);
     const [selectedUserId, setSelectedUserId] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
+    const [activeTab, setActiveTab] = useState('people'); // Default to people tab
+    const [assignmentId, setAssignmentId] = useState(null);
+    const [assignmentText, setAssignmentText] = useState('');
+    const [quizId, setQuizId] = useState(null);
+    const [quizTitle, setQuizTitle] = useState('');
+    const [descriptionUpdate, setDescription] = useState('');
+    const [courseNameUpdate, setCourseName] = useState('');
 
     // Chat overlay state
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -25,6 +37,12 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const chatBodyRef = useRef(null);
     const connectionRef = useRef(null);
+
+    // Materials overlay state
+    const [isMaterialsOpen, setIsMaterialsOpen] = useState(false);
+
+    //Update modal
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
 
     const disabledRemoveButton = async (authToken) => {
         const decodedToken = jwtDecode(authToken);
@@ -261,8 +279,29 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
         if (!isChatOpen) {
             fetchAllChats();
             initializeSignalR();
+            // Close materials overlay if it's open
+            if (isMaterialsOpen) {
+                setIsMaterialsOpen(false);
+            }
+            setActiveTab('chat');
+        }
+        else {
+            setFile(null);
+            setChatMessage('');
         }
         setIsChatOpen(!isChatOpen);
+    };
+
+    // Toggle materials overlay
+    const toggleMaterials = () => {
+        // Close chat overlay if it's open
+        if (isChatOpen) {
+            setIsChatOpen(false);
+            setFile(null);
+            setChatMessage('');
+        }
+        setIsMaterialsOpen(!isMaterialsOpen);
+        setActiveTab('materials');
     };
 
     // Initialize SignalR connection
@@ -310,6 +349,200 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
         }
     }, [chats, isChatOpen]);
 
+    // Render the appropriate content based on active tab
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'assignments':
+                return (
+                    <div className="gc-tab-content">
+                        <Assignments
+                            authToken={authToken}
+                            courseId={courseId}
+                            courseName={courseName}
+                            adminId={adminId}
+                            admin={admin}
+                            setAssignmentId={setAssignmentId}
+                            setAssignmentText={setAssignmentText}
+                        />
+                    </div>
+                );
+            case 'people':
+                return (
+                    <div className="gc-tab-content">
+                        {/* Teachers Section */}
+                        <div className="gc-section">
+                            <div className="gc-section-header">
+                                <h2>Instructor</h2>
+                            </div>
+                            <div className="gc-section-content">
+                                <div className="gc-person-item">
+                                    <div className="gc-person-avatar">{admin.charAt(0)}</div>
+                                    <div className="gc-person-info">
+                                        <div className="gc-person-name">{admin}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Students Section */}
+                        <div className="gc-section">
+                            <div className="gc-section-header">
+                                <h2>Students</h2>
+                                {isAdmin && (
+                                    <button
+                                        className="gc-icon-button"
+                                        onClick={() => (setSearchUserName(''), setSearchUsernameResults([]))}
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop"
+                                    >
+                                        <span className="material-icons">person_add</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="gc-section-content">
+                                {loading ? (
+                                    <div className="gc-loader-container">
+                                        <Spinner />
+                                    </div>
+                                ) : members.length > 0 ? (
+                                    <div className="gc-people-list">
+                                        {members.map((member) => (
+                                            <div key={member.id} className="gc-person-item">
+                                                <div className="gc-person-avatar">{member.name.charAt(0)}</div>
+                                                <div className="gc-person-info">
+                                                    <div className="gc-person-name">{member.name}</div>
+                                                </div>
+                                                {isAdmin && (
+                                                    <button
+                                                        className="gc-icon-button gc-remove-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#staticBackdropRemove"
+                                                        onClick={() => setSelectedUserId(member.memberId)}
+                                                    >
+                                                        <span className="material-icons">remove_circle_outline</span>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="gc-empty-state">
+                                        <span className="material-icons gc-empty-icon">people</span>
+                                        <p>No students in this class yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'chat':
+                return (
+                    <div className="gc-tab-content">
+                        {/* Teachers Section */}
+                        <div className="gc-section">
+                            <div className="gc-section-header">
+                                <h2>Instructor</h2>
+                            </div>
+                            <div className="gc-section-content">
+                                <div className="gc-person-item">
+                                    <div className="gc-person-avatar">{admin.charAt(0)}</div>
+                                    <div className="gc-person-info">
+                                        <div className="gc-person-name">{admin}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Students Section */}
+                        <div className="gc-section">
+                            <div className="gc-section-header">
+                                <h2>Students</h2>
+                                {isAdmin && (
+                                    <button
+                                        className="gc-icon-button"
+                                        onClick={() => (setSearchUserName(''), setSearchUsernameResults([]))}
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#staticBackdrop"
+                                    >
+                                        <span className="material-icons">person_add</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="gc-section-content">
+                                {loading ? (
+                                    <div className="gc-loader-container">
+                                        <Spinner />
+                                    </div>
+                                ) : members.length > 0 ? (
+                                    <div className="gc-people-list">
+                                        {members.map((member) => (
+                                            <div key={member.id} className="gc-person-item">
+                                                <div className="gc-person-avatar">{member.name.charAt(0)}</div>
+                                                <div className="gc-person-info">
+                                                    <div className="gc-person-name">{member.name}</div>
+                                                </div>
+                                                {isAdmin && (
+                                                    <button
+                                                        className="gc-icon-button gc-remove-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#staticBackdropRemove"
+                                                        onClick={() => setSelectedUserId(member.memberId)}
+                                                    >
+                                                        <span className="material-icons">remove_circle_outline</span>
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="gc-empty-state">
+                                        <span className="material-icons gc-empty-icon">people</span>
+                                        <p>No students in this class yet</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ); // Chat is handled separately via overlay
+            case 'materials':
+                return (
+                    <div className="gc-tab-content">
+                        <MaterialsPage
+                            courseId={courseId}
+                            authToken={authToken}
+                            adminId={adminId}
+                            isMaterialsOpen={isMaterialsOpen}
+                            toggleMaterials={toggleMaterials}
+                        />
+                    </div>
+                ); // Materials is handled separately via overlay
+            case 'quizzes':
+                return (
+                    <div className="gc-tab-content">
+                        <Quiz
+                            authToken={authToken}
+                            adminId={adminId}
+                            admin={admin}
+                            courseId={courseId}
+                            courseName={courseName}
+                            setQuizId={setQuizId}
+                            quizTitle={quizTitle}
+                            setQuizTitle={setQuizTitle}
+                        />
+                    </div>
+                );
+            default:
+                return (
+                    <div className="gc-empty-state">
+                        <span className="material-icons gc-empty-icon">info</span>
+                        <p>Select a tab to view content</p>
+                    </div>
+                );
+        }
+    };
+
     return (
         <div className="gc-course-details-container">
             {/* Course Banner */}
@@ -319,87 +552,104 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
                     <p className="gc-course-section">{description}</p>
                     <p className="gc-course-admin">Instructor: {admin}</p>
                 </div>
+                <div className="gc-course-actions">
+                    <NavLink to="/courses" className="gc-button gc-button-text" style={{ color: 'black' }}>
+                        <span className="material-icons">arrow_back</span>
+                        Back
+                    </NavLink>
+
+                    {isAdmin ? (
+                        <div className="gc-action-group">
+                            <button
+                                className="gc-button gc-button-text"
+                                data-bs-toggle="modal"
+                                data-bs-target="#exampleModal"
+                                style={{ color: 'black' }}
+                            >
+                                <span className="material-icons">delete</span>
+                                Delete
+                            </button>
+                            <button
+                                className="gc-button gc-button-text"
+                                data-bs-toggle="modal"
+                                data-bs-target="#updateCourseModal"
+                                style={{ color: 'black' }}
+                            >
+                                <span className="material-icons">edit</span>
+                                Edit
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            className="gc-button gc-button-text gc-danger-button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#leaveModal"
+                            style={{ color: 'black' }}
+                        >
+                            <span className="material-icons">exit_to_app</span>
+                            Leave
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Tab Navigation */}
             <div className="gc-tabs-container">
                 <div className="gc-tab-list">
-                    <div className={`gc-tab-item ${isChatOpen ? 'active' : ''}`} onClick={toggleChat}>Chats</div>
-                    <NavLink to="/assignments" className="gc-tab-item">Classwork</NavLink>
-                    <NavLink to="/materials" className="gc-tab-item">Materials</NavLink>
-                    <NavLink to="/quiz" className="gc-tab-item">Quizzes</NavLink>
-                    <NavLink to="http://localhost:3001" target="_blank" className="gc-tab-item">Meet</NavLink>
-                    <div className="gc-tab-item active">People</div>
+                    <div
+                        className={`gc-tab-item ${activeTab === 'chat' ? 'active' : ''}`}
+                        onClick={toggleChat}
+                    >
+                        Chats
+                    </div>
+                    <div
+                        className={`gc-tab-item ${activeTab === 'assignments' ? 'active' : ''}`}
+                        onClick={() => {
+                            setActiveTab('assignments');
+                            setIsChatOpen(false);
+                            setIsMaterialsOpen(false);
+                        }}
+                    >
+                        Assignments
+                    </div>
+                    <div
+                        className={`gc-tab-item ${activeTab === 'materials' ? 'active' : ''}`}
+                        onClick={toggleMaterials}
+                    >
+                        Materials
+                    </div>
+                    <div
+                        className={`gc-tab-item ${activeTab === 'quizzes' ? 'active' : ''}`}
+                        onClick={() => {
+                            setActiveTab('quizzes');
+                            setIsChatOpen(false);
+                            setIsMaterialsOpen(false);
+                        }}
+                    >
+                        Quizzes
+                    </div>
+                    {/* <NavLink to="/quiz" className="gc-tab-item">
+                        Quizzes
+                    </NavLink> */}
+                    <NavLink to="http://localhost:3001" target="_blank" className="gc-tab-item">
+                        Meetings
+                    </NavLink>
+                    <div
+                        className={`gc-tab-item ${activeTab === 'people' ? 'active' : ''}`}
+                        onClick={() => {
+                            setActiveTab('people');
+                            setIsChatOpen(false);
+                            setIsMaterialsOpen(false);
+                        }}
+                    >
+                        People
+                    </div>
                 </div>
             </div>
 
             {/* Course Content */}
             <div className="gc-content-container">
-                {/* Teachers Section */}
-                <div className="gc-section">
-                    <div className="gc-section-header">
-                        <h2>Instructor</h2>
-                    </div>
-                    <div className="gc-section-content">
-                        <div className="gc-person-item">
-                            <div className="gc-person-avatar">{admin.charAt(0)}</div>
-                            <div className="gc-person-info">
-                                <div className="gc-person-name">{admin}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Students Section */}
-                <div className="gc-section">
-                    <div className="gc-section-header">
-                        <h2>Students</h2>
-                        {isAdmin && (
-                            <button
-                                className="gc-icon-button"
-                                onClick={() => (setSearchUserName(''), setSearchUsernameResults([]))}
-                                data-bs-toggle="modal"
-                                data-bs-target="#staticBackdrop"
-                            >
-                                <span className="material-icons">person_add</span>
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="gc-section-content">
-                        {loading ? (
-                            <div className="gc-loader-container">
-                                <Spinner />
-                            </div>
-                        ) : members.length > 0 ? (
-                            <div className="gc-people-list">
-                                {members.map((member) => (
-                                    <div key={member.id} className="gc-person-item">
-                                        <div className="gc-person-avatar">{member.name.charAt(0)}</div>
-                                        <div className="gc-person-info">
-                                            <div className="gc-person-name">{member.name}</div>
-                                        </div>
-                                        {isAdmin && (
-                                            <button
-                                                className="gc-icon-button gc-remove-btn"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#staticBackdropRemove"
-                                                onClick={() => setSelectedUserId(member.memberId)}
-                                            >
-                                                <span className="material-icons">remove_circle_outline</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="gc-empty-state">
-                                <span className="material-icons gc-empty-icon">people</span>
-                                <p>No students in this class yet</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                {renderContent()}
             </div>
 
             {/* Course Actions */}
@@ -419,10 +669,14 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
                             <span className="material-icons">delete</span>
                             Delete Course
                         </button>
-                        <NavLink to="/updateCourse" className="gc-button gc-button-text">
+                        <button
+                            className="gc-button gc-button-text"
+                            data-bs-toggle="modal"
+                            data-bs-target="#updateCourseModal"
+                        >
                             <span className="material-icons">edit</span>
                             Edit Course
-                        </NavLink>
+                        </button>
                     </div>
                 ) : (
                     <button
@@ -437,7 +691,7 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
             </div>
 
             {/* Chat Overlay */}
-            <div className={`gc-chat-overlay ${isChatOpen ? 'open' : ''}`}>
+            <div className={`gc-chat-overlay ${isChatOpen ? 'open' : ''}`} >
                 <div className="gc-chat-content">
                     <div className="gc-chat-header">
                         <h2 className="gc-chat-title">Chats</h2>
@@ -515,6 +769,16 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
                     </div>
                 </div>
             </div>
+
+            {/* Materials Overlay */}
+            {/* <MaterialsOverlay
+                courseId={courseId}
+                authToken={authToken}
+                adminId={adminId}
+                isMaterialsOpen={isMaterialsOpen}
+                toggleMaterials={toggleMaterials}
+            /> */}
+
 
             {/* Add Member Modal */}
             <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -600,6 +864,31 @@ function CourseDetails({ authToken, courseId, courseName, admin, adminId, descri
                             >
                                 Remove
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Update Course Modal */}
+            <div className="modal fade" id="updateCourseModal" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="updateCourseModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content gc-modal">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="updateCourseModalLabel">Update Course</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <UpdateCourse
+                                authToken={authToken}
+                                courseId={courseId}
+                                courseName={courseName}
+                                setCourseName={setCourseName}
+                                description={description}
+                                setDescription={setDescription}
+                                setLoading={setLoading}
+                                adminId={adminId}
+                                admin={admin}
+                            />
                         </div>
                     </div>
                 </div>

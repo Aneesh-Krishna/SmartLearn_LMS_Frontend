@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 import '../styles/CreateCourse.css'; // Import the CSS file
 
 function UpdateCourse({ authToken, courseId, courseName, setCourseName, description, setDescription, setLoading, adminId, admin }) {
-
-    document.title = 'Update-Course: SmartLearn_LMS'
+    document.title = 'Update-Course: SmartLearn_LMS';
 
     const [formData, setFormData] = useState({
         courseName: courseName,
@@ -39,24 +38,26 @@ function UpdateCourse({ authToken, courseId, courseName, setCourseName, descript
             });
 
             if (response.ok) {
-                // Redirect to the courses page or a success page
-                setCourseName(formData.courseName)
-                setDescription(formData.description)
-                navigate('/courseDetails');
+                // Update the parent state and close the modal
+                setCourseName(formData.courseName);
+                setDescription(formData.description);
+                navigate("/courseDetails");
+                // Close the modal using Bootstrap's JavaScript
+                document.getElementById('closeUpdateModal').click();
             } else {
                 const errorData = await response.json();
-                setError(errorData.message || 'Failed to create the course.');
+                setError(errorData.message || 'Failed to update the course.');
             }
         } catch (error) {
-            setError('Error creating the course.');
+            setError('Error updating the course.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="create-course-container" style={{ marginTop: 20 }}>
-            <h3 className="create-course-heading">Add New Course</h3>
+        <div className="create-course-container" style={{ marginTop: 0 }}>
+            <h3 className="create-course-heading">Update Course</h3>
             {error && <div className="alert alert-danger">{error}</div>}
 
             <form onSubmit={handleSubmit} className="create-course-form">
@@ -78,12 +79,20 @@ function UpdateCourse({ authToken, courseId, courseName, setCourseName, descript
                     className="input-field"
                     required
                 />
-                <button type="submit" className="submit-btn">Update</button>
+                <div className="d-flex justify-content-end gap-2 mt-3">
+                    <button
+                        type="button"
+                        className="gc-button gc-button-text"
+                        data-bs-dismiss="modal"
+                        id="closeUpdateModal"
+                    >
+                        Cancel
+                    </button>
+                    <button type="submit" className="gc-button gc-button-contained">Update</button>
+                </div>
             </form>
-            <NavLink to="/courseDetails" className="return-link">Return</NavLink>
         </div>
     );
-
 }
 
 export default UpdateCourse;
